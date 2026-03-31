@@ -1,0 +1,86 @@
+[
+  {
+    "name": "moong dal khichdi",
+    "dosha": ["vata", "pitta", "kapha"],
+    "goals": ["weight loss", "general wellness", "better digestion"],
+    "mealTypes": ["lunch", "dinner"],
+    "notes": "light, easy to digest, calming"
+  },
+  {
+    "name": "stewed apples",
+    "dosha": ["vata", "pitta"],
+    "goals": ["weight loss", "better digestion", "general wellness"],
+    "mealTypes": ["breakfast"],
+    "notes": "warm fruit option, gentle on digestion"
+  },
+  {
+    "name": "ragi porridge",
+    "dosha": ["vata", "kapha"],
+    "goals": ["weight loss", "general wellness"],
+    "mealTypes": ["breakfast"],
+    "notes": "warming and sustaining"
+  },
+  {
+    "name": "vegetable millet bowl",
+    "dosha": ["kapha", "pitta"],
+    "goals": ["weight loss", "general wellness"],
+    "mealTypes": ["lunch"],
+    "notes": "high fiber, balanced"
+  },
+  {
+    "name": "moong soup",
+    "dosha": ["vata", "pitta", "kapha"],
+    "goals": ["weight loss", "better digestion", "general wellness"],
+    "mealTypes": ["dinner"],
+    "notes": "light evening meal"
+  },
+  {
+    "name": "paneer with sauteed vegetables",
+    "dosha": ["vata", "kapha"],
+    "goals": ["muscle gain", "general wellness"],
+    "mealTypes": ["lunch", "dinner"],
+    "notes": "higher protein vegetarian meal"
+  },
+  {
+    "name": "ghee rice with dal",
+    "dosha": ["vata", "pitta"],
+    "goals": ["muscle gain", "general wellness"],
+    "mealTypes": ["lunch"],
+    "notes": "nourishing and grounding"
+  },
+  {
+    "name": "banana date smoothie bowl",
+    "dosha": ["vata"],
+    "goals": ["muscle gain"],
+    "mealTypes": ["breakfast"],
+    "notes": "calorie-dense and strengthening"
+  },
+  {
+    "name": "oats with soaked almonds",
+    "dosha": ["vata", "kapha"],
+    "goals": ["muscle gain", "general wellness"],
+    "mealTypes": ["breakfast"],
+    "notes": "steady energy breakfast"
+  },
+  {
+    "name": "bottle gourd soup",
+    "dosha": ["pitta", "kapha"],
+    "goals": ["weight loss", "better digestion"],
+    "mealTypes": ["dinner"],
+    "notes": "cooling and light"
+  },
+  {
+    "name": "coriander rice with vegetables",
+    "dosha": ["pitta"],
+    "goals": ["general wellness", "better digestion"],
+    "mealTypes": ["lunch"],
+    "notes": "cooling lunch option"
+  },
+  {
+    "name": "idli with coconut chutney",
+    "dosha": ["pitta", "vata"],
+    "goals": ["better digestion", "general wellness"],
+    "mealTypes": ["breakfast"],
+    "notes": "soft fermented breakfast"
+  }
+]

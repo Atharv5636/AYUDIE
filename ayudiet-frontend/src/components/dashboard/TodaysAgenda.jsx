@@ -1,0 +1,256 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+const initialForm = {
+  patientId: "",
+  time: "",
+  type: "",
+  status: "upcoming",
+};
+
+const formatTime = (time) => {
+  if (!time) return "";
+
+  const parsedDate = new Date(`1970-01-01T${time}`);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    return time;
+  }
+
+  return parsedDate.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+};
+
+function TodaysAgenda({
+  agenda = [],
+  patients = [],
+  nextAgendaId,
+  onAdd,
+  onDelete,
+}) {
+  const navigate = useNavigate();
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState(initialForm);
+  const [error, setError] = useState("");
+
+  function handleChange(event) {
+    const { name, value } = event.target;
+
+    setForm((current) => ({
+      ...current,
+      [name]: value,
+    }));
+    setError("");
+  }
+
+  function handleSubmit(event) {
+    event.preventDefault();
+
+    const selectedPatient = patients.find(
+      (patient) => patient._id === form.patientId
+    );
+
+    if (!selectedPatient || !form.time || !form.type || !form.status) {
+      setError("Patient, time, type, and status are required");
+      return;
+    }
+
+    onAdd({
+      id: `agenda-${Date.now()}`,
+      patientId: selectedPatient._id,
+      name: selectedPatient.name,
+      time: form.time,
+      type: form.type.trim(),
+      status: form.status,
+    });
+
+    setForm(initialForm);
+    setError("");
+    setShowForm(false);
+  }
+
+  return (
+    <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-6">
+      <div className="mb-4 flex items-center justify-between">
+        <div>
+          <h2 className="text-lg font-semibold text-white">Today's Agenda</h2>
+          <p className="mt-1 text-sm text-neutral-400">
+            Focus on the next visit and track what is already done.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setShowForm((current) => !current)}
+          className="text-sm text-secondary hover:text-white transition"
+        >
+          {showForm ? "Close" : "+ Add New"}
+        </button>
+      </div>
+
+      {showForm && (
+        <form
+          onSubmit={handleSubmit}
+          className="mb-4 space-y-4 rounded-lg border border-neutral-800 bg-neutral-800/60 p-4"
+        >
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="block">
+              <span className="mb-2 block text-sm text-neutral-300">Patient</span>
+              <select
+                name="patientId"
+                value={form.patientId}
+                onChange={handleChange}
+                className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-white outline-none"
+              >
+                <option value="">Select patient</option>
+                {patients.map((patient) => (
+                  <option key={patient._id} value={patient._id}>
+                    {patient.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label className="block">
+              <span className="mb-2 block text-sm text-neutral-300">Time</span>
+              <input
+                name="time"
+                type="time"
+                value={form.time}
+                onChange={handleChange}
+                className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-white outline-none"
+              />
+            </label>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="block">
+              <span className="mb-2 block text-sm text-neutral-300">Type</span>
+              <input
+                name="type"
+                value={form.type}
+                onChange={handleChange}
+                placeholder="Consultation"
+                className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-white outline-none"
+              />
+            </label>
+
+            <label className="block">
+              <span className="mb-2 block text-sm text-neutral-300">Status</span>
+              <select
+                name="status"
+                value={form.status}
+                onChange={handleChange}
+                className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-white outline-none"
+              >
+                <option value="upcoming">Upcoming</option>
+                <option value="completed">Completed</option>
+              </select>
+            </label>
+          </div>
+
+          {error && <p className="text-sm text-red-400">{error}</p>}
+
+          <div className="flex gap-3">
+            <button
+              type="submit"
+              className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-green-700"
+            >
+              Add Agenda Item
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setForm(initialForm);
+                setError("");
+                setShowForm(false);
+              }}
+              className="rounded-lg border border-neutral-700 px-4 py-2 text-sm text-neutral-200 transition hover:bg-neutral-800"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      )}
+
+      <div className="space-y-3">
+        {agenda.length === 0 ? (
+          <div className="rounded-lg border border-dashed border-neutral-800 px-4 py-6 text-sm text-neutral-400">
+            No agenda items yet. Add one to schedule the next patient interaction.
+          </div>
+        ) : null}
+
+        {agenda.map((item) => (
+          <div
+            key={item.id}
+            className={`rounded-lg border px-4 py-3 ${
+              item.id === nextAgendaId
+                ? "border-emerald-500/40 bg-emerald-500/10"
+                : "border-neutral-800 bg-neutral-800/60"
+            }`}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className="font-medium text-white">{item.name}</p>
+                  {item.id === nextAgendaId && (
+                    <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-medium text-emerald-300">
+                      Next
+                    </span>
+                  )}
+                </div>
+                <p className="mt-1 text-sm text-neutral-300">{item.type}</p>
+              </div>
+
+              <span
+                className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${
+                  item.status === "completed"
+                    ? "bg-neutral-700 text-neutral-200"
+                    : "bg-blue-500/15 text-blue-300"
+                }`}
+              >
+                {item.status === "completed" ? "Completed" : "Upcoming"}
+              </span>
+            </div>
+
+            <div className="mt-3 flex items-center justify-between gap-4 text-sm">
+              <p className="text-neutral-400">{formatTime(item.time)}</p>
+
+              <div className="flex gap-4">
+                <button
+                  type="button"
+                  disabled={!item.patientId}
+                  onClick={() => {
+                    if (!item.patientId) {
+                      console.error("Missing patientId for agenda edit", item);
+                      return;
+                    }
+
+                    console.log("Editing agenda patient:", item);
+                    navigate(`/dashboard/patients/${item.patientId}/edit`);
+                  }}
+                  className="text-neutral-300 hover:text-white disabled:cursor-not-allowed disabled:text-neutral-500"
+                >
+                  Edit
+                </button>
+
+                <button
+                  onClick={() => onDelete(item.id)}
+                  className="text-red-400 hover:text-red-300"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default TodaysAgenda;
