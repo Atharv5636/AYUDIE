@@ -241,20 +241,30 @@ function Dashboard() {
     }));
   }, [activePlans]);
 
-  const criticalPatients = plansWithScore.filter(
+  const patientsNeedingAttention = plansWithScore.filter(
     (plan) => plan.attentionScore >= 5
-  );
-  const patientsNeedingAttention = criticalPatients.length;
+  ).length;
 
-  const decliningPlans = activePlans.filter((plan) => {
-    const trend = getTrendValue(plan);
-    return trend === "declining" || trend === "slight_decline";
+  const decliningPlans = plansWithScore.filter(
+    (plan) =>
+      (plan.analysis?.trend || "").toLowerCase() === "declining"
+  ).length;
+
+  const lowAdherenceCases = plansWithScore.filter((plan) => {
+    const issue = plan.analysis?.primaryIssue || "";
+    return issue.toLowerCase().includes("adherence");
   }).length;
 
-  const lowAdherenceCases = enrichedPatients.filter((patient) => {
-    const issue = patient.dashboardIntelligence?.primaryIssue;
-    return issue === "adherence";
-  }).length;
+  const criticalPatients = plansWithScore
+    .filter((plan) => plan.attentionScore >= 5)
+    .slice(0, 3);
+
+  console.log({
+    totalPlans: activePlans.length,
+    patientsNeedingAttention,
+    decliningPlans,
+    lowAdherenceCases,
+  });
 
   const topCriticalPatients = [...enrichedPatients]
     .filter((patient) => needsAttention(patient))
@@ -489,8 +499,8 @@ function Dashboard() {
                 title: "Patients Needing Attention",
                 value: patientsNeedingAttention,
                 note:
-                  criticalPatients.length > 0
-                    ? `${criticalPatients.length} patient${criticalPatients.length > 1 ? "s" : ""} need attention`
+                  patientsNeedingAttention > 0
+                    ? `${patientsNeedingAttention} patient(s) need attention`
                     : "No patients need attention",
               },
               {
