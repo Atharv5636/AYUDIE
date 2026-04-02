@@ -11,7 +11,6 @@ const {
   approvePlan,
   updatePlan,
   rejectPlan,
-  getAdaptivePlanModifications,
 } = require("../controllers/plan.controller");
 
 const router = express.Router();
@@ -20,7 +19,6 @@ router.use(authMiddleware);
 
 router.get("/pending", getPendingPlans);
 router.get("/patient/:patientId", getPlansByPatient);
-router.get("/patient/:patientId/adaptive-modifications", getAdaptivePlanModifications);
 router.post("/generate-ai", generateAiPlan);
 router.post("/generate-day", generateAiDay);
 router.post("/fix-ai", fixAiPlan);

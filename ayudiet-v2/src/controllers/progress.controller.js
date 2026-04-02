@@ -20,7 +20,7 @@ const createProgressLog = async (req, res, next) => {
   try {
     const {
       patient: patientFromBody,
-      patientId,
+      patientId: patientIdFromBody,
       weight,
       energy,
       energyLevel,
@@ -28,10 +28,10 @@ const createProgressLog = async (req, res, next) => {
       adherence,
       notes,
     } = req.body;
-    const patient = patientFromBody || patientId;
+    const patientId = patientFromBody || patientIdFromBody;
     const normalizedEnergyLevel = energyLevel ?? energy;
 
-    if (!patient || weight === undefined || !normalizedEnergyLevel || !digestion) {
+    if (!patientId || weight === undefined || !normalizedEnergyLevel || !digestion) {
       return next(
         new ApiError(
           400,
@@ -40,12 +40,12 @@ const createProgressLog = async (req, res, next) => {
       );
     }
 
-    if (!isValidObjectId(patient)) {
+    if (!isValidObjectId(patientId)) {
       return next(new ApiError(400, "Invalid patient id"));
     }
 
     const existingPatient = await Patient.findOne({
-      _id: patient,
+      _id: patientId,
       doctor: req.user.id,
     });
 
@@ -54,13 +54,13 @@ const createProgressLog = async (req, res, next) => {
     }
 
     const activePlan = await Plan.findOne({
-      patient,
+      patient: patientId,
       doctor: req.user.id,
       isActive: true,
     });
 
     const progressLog = await ProgressLog.create({
-      patient,
+      patient: patientId,
       plan: activePlan?._id || undefined,
       doctor: req.user.id,
       weight: Number(weight),
@@ -70,21 +70,19 @@ const createProgressLog = async (req, res, next) => {
       notes: notes?.trim() || "",
     });
 
-    if (!activePlan) {
-      console.error("No active plan found for patient");
+    const result = await modifyPlanBasedOnProgress(patientId);
+    const plan = await Plan.findOne({ patient: patientId, isActive: true });
+
+    if (!plan) {
+      console.log("No active plan found for patient:", patientId);
+    } else if (!result || !result.analysis) {
+      console.log("No analysis computed for patient:", patientId);
     } else {
-      const result = await modifyPlanBasedOnProgress(patient);
-
-      activePlan.analysis = {
-        ...(result?.analysis || {}),
-        computedAt: new Date(),
-      };
-
-      await activePlan.save();
-
-      console.log("Recomputed analysis after progress update");
-      console.log("Recomputed analysis:", activePlan.analysis);
-      console.log("Saved plan ID:", activePlan._id);
+      console.log("Analysis result:", result);
+      plan.analysis = result.analysis;
+      plan.analysis.computedAt = new Date();
+      await plan.save();
+      console.log("Updated analysis saved to plan:", plan.analysis);
     }
 
     res.status(201).json({

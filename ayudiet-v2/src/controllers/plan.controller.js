@@ -419,10 +419,11 @@ const ensureAnalysisInResponse = (plan) => {
   const normalizedPlan =
     typeof plan.toObject === "function" ? plan.toObject() : { ...plan };
 
-  return {
-    ...normalizedPlan,
-    analysis: normalizedPlan.analysis || null,
-  };
+  if (!normalizedPlan.analysis) {
+    normalizedPlan.analysis = null;
+  }
+
+  return normalizedPlan;
 };
 
 const logOutgoingPlan = (plan) => {
@@ -887,7 +888,9 @@ const getPlansByPatient = async (req, res, next) => {
     const plans = await Plan.find({
       patient: patientId,
       doctor: req.user.id,
-    }).sort({ isActive: -1, createdAt: -1 });
+    })
+      .populate("patient", "name age gender")
+      .sort({ isActive: -1, createdAt: -1 });
 
     const plansWithAnalysis = (await attachAnalysisToPlans(plans)).map(
       ensureAnalysisInResponse

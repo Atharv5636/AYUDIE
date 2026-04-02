@@ -7,7 +7,6 @@ import {
 } from "../../services/progress.service";
 import {
   createPlan,
-  fetchPendingPlans,
   fetchPlansByPatient,
   fixAiPlan,
   generateAiPlan,
@@ -74,8 +73,6 @@ function PatientDetails() {
   const [toast, setToast] = useState("");
 
   const plans = usePlansStore((state) => state.patientPlans[id]);
-  const pendingPlans = usePlansStore((state) => state.plans);
-  const setPlans = usePlansStore((state) => state.setPlans);
   const setPatientPlans = usePlansStore((state) => state.setPatientPlans);
   const upsertPatientPlan = usePlansStore((state) => state.upsertPatientPlan);
 
@@ -284,17 +281,6 @@ function PatientDetails() {
     }
   }, [id, setPatientPlans]);
 
-  const refreshPendingPlans = useCallback(async () => {
-    try {
-      const data = await fetchPendingPlans();
-      setPlans(data?.plans || []);
-      return data?.plans || [];
-    } catch (error) {
-      console.error("Error refreshing pending plans:", error);
-      return [];
-    }
-  }, [setPlans]);
-
   useEffect(() => {
     console.log("Logs:", progressLogs);
   }, [progressLogs]);
@@ -453,7 +439,6 @@ function PatientDetails() {
         });
 
         setPatientPlans(id, [createdPlan, ...visiblePlans]);
-        setPlans([createdPlan, ...pendingPlans]);
       }
 
       resetBuilder();
@@ -488,7 +473,7 @@ function PatientDetails() {
         notes: progressForm.notes,
       });
 
-      await Promise.all([fetchProgress(), fetchPatientPlans(), refreshPendingPlans()]);
+      await Promise.all([fetchProgress(), fetchPatientPlans()]);
       setProgressForm((current) => ({
         ...current,
         energyLevel: "3",

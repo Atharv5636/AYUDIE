@@ -90,6 +90,11 @@ const planSchema = new mongoose.Schema(
       enum: ["pending", "approved", "rejected"],
       default: "pending",
     },
+
+    adjustments: {
+      type: [String],
+      default: [],
+    },
   },
   { timestamps: true }
 );

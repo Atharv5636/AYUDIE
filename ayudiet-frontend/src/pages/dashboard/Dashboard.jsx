@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
 
@@ -35,6 +35,8 @@ function Dashboard() {
   const [selectedActivePlan, setSelectedActivePlan] = useState(null);
   const [pendingPlans, setPendingPlans] = useState([]);
   const [activePlans, setActivePlans] = useState([]);
+  const [appliedPlans, setAppliedPlans] = useState({});
+  const [loadingPlans, setLoadingPlans] = useState({});
 
   const getPlanAnalysis = (entry) =>
     entry?.analysis ||
@@ -89,6 +91,49 @@ function Dashboard() {
       return planPatientId === patient._id;
     }) || null;
 
+  function getAttentionScore(plan) {
+    let score = 0;
+
+    const analysis = plan?.analysis || getPlanAnalysis(plan) || {};
+    const effectiveness =
+      typeof analysis?.effectiveness === "number"
+        ? analysis.effectiveness
+        : analysis?.effectiveness?.score ||
+          (typeof plan?.dashboardIntelligence?.score === "number"
+            ? plan.dashboardIntelligence.score
+            : 0);
+
+    const trend = (
+      analysis?.trend ||
+      plan?.dashboardIntelligence?.trend ||
+      ""
+    ).toLowerCase();
+    const issue = (
+      analysis?.primaryIssue ||
+      plan?.dashboardIntelligence?.primaryIssue ||
+      ""
+    ).toLowerCase();
+
+    if (effectiveness < 40) score += 3;
+    else if (effectiveness < 55) score += 2;
+    else if (effectiveness < 75) score += 1;
+
+    if (trend === "declining") score += 3;
+    else if (trend === "stable") score += 1;
+
+    if (issue.includes("adherence")) score += 2;
+    if (issue.includes("energy")) score += 1;
+    if (issue.includes("progress")) score += 1;
+
+    return score;
+  }
+
+  function getPriorityLabel(score) {
+    if (score >= 6) return "Critical";
+    if (score >= 4) return "Moderate";
+    return "Stable";
+  }
+
   const getPatientIntelligence = (patient) => {
     const linkedPlan = getLatestPlanForPatient(patient);
     const source = linkedPlan || patient;
@@ -105,14 +150,7 @@ function Dashboard() {
     };
   };
 
-  const isImmediateAttention = (entry) => {
-    const score = entry?.dashboardIntelligence?.score ?? getEffectivenessScore(entry);
-    const trend = entry?.dashboardIntelligence?.trend ?? getTrendValue(entry) ?? "stable";
-
-    return (
-      (typeof score === "number" && score < 40) || trend === "declining"
-    );
-  };
+  const isImmediateAttention = (plan) => (plan?.attentionScore ?? 0) >= 5;
 
   const needsAttention = (entry) => {
     const score = entry?.dashboardIntelligence?.score ?? getEffectivenessScore(entry);
@@ -196,9 +234,17 @@ function Dashboard() {
     dashboardIntelligence: getPatientIntelligence(patient),
   }));
 
-  const patientsNeedingAttention = enrichedPatients.filter((patient) => {
-    return needsAttention(patient);
-  }).length;
+  const plansWithScore = useMemo(() => {
+    return activePlans.map((plan) => ({
+      ...plan,
+      attentionScore: getAttentionScore(plan),
+    }));
+  }, [activePlans]);
+
+  const criticalPatients = plansWithScore.filter(
+    (plan) => plan.attentionScore >= 5
+  );
+  const patientsNeedingAttention = criticalPatients.length;
 
   const decliningPlans = activePlans.filter((plan) => {
     const trend = getTrendValue(plan);
@@ -251,40 +297,9 @@ function Dashboard() {
     })
     .slice(0, 3);
 
-  const sortedActivePlans = [...activePlans].sort((left, right) => {
-    const leftScore =
-      typeof getEffectivenessScore(left) === "number"
-        ? getEffectivenessScore(left)
-        : 101;
-    const rightScore =
-      typeof getEffectivenessScore(right) === "number"
-        ? getEffectivenessScore(right)
-        : 101;
-
-    if (leftScore !== rightScore) {
-      return leftScore - rightScore;
-    }
-
-    const trendRank = {
-      declining: 0,
-      slight_decline: 1,
-      stable: 2,
-      slight_improvement: 3,
-      improving: 4,
-    };
-    const leftTrend = getTrendValue(left) || "stable";
-    const rightTrend = getTrendValue(right) || "stable";
-
-    if ((trendRank[leftTrend] ?? 99) !== (trendRank[rightTrend] ?? 99)) {
-      return (trendRank[leftTrend] ?? 99) - (trendRank[rightTrend] ?? 99);
-    }
-
-    return (
-      (typeof left?.patient === "object" ? left.patient?.name : "") || ""
-    ).localeCompare(
-      (typeof right?.patient === "object" ? right.patient?.name : "") || ""
-    );
-  });
+  const sortedActivePlans = [...plansWithScore].sort(
+    (a, b) => b.attentionScore - a.attentionScore
+  );
 
   const nextAgendaId =
     agenda.find((item) => item.status !== "completed")?.id || null;
@@ -380,6 +395,42 @@ function Dashboard() {
     setAgenda((prevAgenda) => [...prevAgenda, agendaItem]);
   };
 
+  function handleApplyChanges(plan) {
+    const planId = String(plan?._id);
+
+    if (loadingPlans[planId] || appliedPlans[planId]) return;
+    if (!plan?.adjustments?.length) return;
+
+    console.log("Applying changes for:", planId);
+    console.log("Adjustments:", plan.adjustments);
+
+    setLoadingPlans((prev) => ({
+      ...prev,
+      [planId]: true,
+    }));
+
+    setTimeout(() => {
+      try {
+        setAppliedPlans((prev) => ({
+          ...prev,
+          [planId]: true,
+        }));
+
+        setLoadingPlans((prev) => ({
+          ...prev,
+          [planId]: false,
+        }));
+      } catch (err) {
+        console.error("Failed inside timeout:", err);
+
+        setLoadingPlans((prev) => ({
+          ...prev,
+          [planId]: false,
+        }));
+      }
+    }, 800);
+  }
+
   useEffect(() => {
     const loadDashboard = async () => {
       try {
@@ -437,7 +488,10 @@ function Dashboard() {
               {
                 title: "Patients Needing Attention",
                 value: patientsNeedingAttention,
-                note: "Score below 60, declining, or adherence-driven",
+                note:
+                  criticalPatients.length > 0
+                    ? `${criticalPatients.length} patient${criticalPatients.length > 1 ? "s" : ""} need attention`
+                    : "No patients need attention",
               },
               {
                 title: "Declining Plans",
@@ -561,25 +615,45 @@ function Dashboard() {
           ) : (
             <div className="space-y-4">
               {sortedActivePlans.map((plan) => {
-                const trend = getTrendValue(plan) || "stable";
+                console.log("Active plan:", plan);
+                const planId = String(plan?._id);
+                const trend =
+                  plan.analysis?.trend ??
+                  plan.analysis?.effectivenessTrend?.trend ??
+                  "-";
                 const trendMeta = getTrendMeta(trend);
                 const TrendIcon = trendMeta?.icon;
-                const patientName =
-                  typeof plan?.patient === "object"
-                    ? plan?.patient?.name || "Unknown Patient"
-                    : "Unknown Patient";
-                const primaryIssue = getPrimaryIssue(plan) || "none";
-                const score = getEffectivenessScore(plan);
+                const patientName = plan.patient?.name || "Unknown Patient";
+                const primaryIssue = plan.analysis?.primaryIssue ?? "-";
+                const adjustments = plan.adjustments || [];
+                const score =
+                  plan.analysis?.effectiveness?.score ??
+                  plan.analysis?.effectiveness ??
+                  "-";
 
                 return (
                   <div
-                    key={plan._id}
+                    key={planId}
                     className="rounded-lg border border-neutral-800 bg-neutral-800/60 p-4"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <p className="font-medium text-white">{patientName}</p>
+                        <p className="text-base font-semibold text-white">{patientName}</p>
                         <p className="mt-1 text-sm text-neutral-400">{plan.title}</p>
+                        <p className="text-[10px] mt-1">
+                          <span
+                            className={
+                              plan.attentionScore >= 6
+                                ? "text-red-400"
+                                : plan.attentionScore >= 4
+                                  ? "text-yellow-400"
+                                  : "text-green-400"
+                            }
+                          >
+                            {getPriorityLabel(plan.attentionScore)}
+                          </span>{" "}
+                          ({plan.attentionScore})
+                        </p>
                       </div>
 
                       <div className="flex items-center gap-2">
@@ -595,23 +669,72 @@ function Dashboard() {
                     </div>
 
                     <div className="mt-4 grid gap-3 text-sm md:grid-cols-3">
-                      <div>
-                        <p className="text-neutral-500">Effectiveness</p>
-                        <p className="mt-1 text-white">
-                          {typeof score === "number" ? score : "-"}
+                      <div className="space-y-1">
+                        <p className="text-xs text-neutral-500">Primary Issue</p>
+                        <p className="mt-1 text-sm font-semibold text-red-400">
+                          {primaryIssue}
+                        </p>
+                        {adjustments.length > 0 && (
+                          <div className="mt-2 rounded-md bg-emerald-900/20 p-2 border border-emerald-700/30">
+                            <p className="text-[11px] font-bold text-emerald-300 tracking-wide">
+                              ACTION REQUIRED
+                            </p>
+                            <p className="text-xs font-semibold text-emerald-400">
+                              Recommended Changes
+                            </p>
+                            <ul className="mt-1 mb-2 list-disc pl-4 text-xs text-neutral-300 space-y-1">
+                              {adjustments.map((item, index) => (
+                                <li key={index}>{item}</li>
+                              ))}
+                            </ul>
+                            <button
+                              type="button"
+                              disabled={
+                                loadingPlans[planId] ||
+                                appliedPlans[planId]
+                              }
+                              onClick={() => handleApplyChanges(plan)}
+                              className={`mt-2 inline-flex items-center justify-center px-4 rounded-md py-1.5 text-xs font-medium text-white transition ${
+                                appliedPlans[planId]
+                                  ? "bg-neutral-700 cursor-not-allowed"
+                                  : "bg-emerald-500 hover:bg-emerald-400"
+                              }`}
+                            >
+                              {loadingPlans[planId]
+                                ? "Applying..."
+                                : appliedPlans[planId]
+                                  ? "Applied"
+                                  : "Apply Changes"}
+                            </button>
+                            {appliedPlans[planId] && adjustments.length > 0 && (
+                              <p className="mt-1 text-[10px] text-neutral-400">
+                                Applied {adjustments.length} change{adjustments.length > 1 ? "s" : ""}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs text-neutral-500">
+                          Effectiveness
+                        </p>
+                        <p className={`mt-1 font-semibold ${
+                          score >= 75
+                            ? "text-green-400"
+                            : score >= 50
+                              ? "text-yellow-400"
+                              : "text-red-400"
+                        }`}>
+                          {score}
                         </p>
                       </div>
-                      <div>
-                        <p className="text-neutral-500">Trend</p>
-                        <div className="mt-1 inline-flex items-center gap-2 text-white">
-                          {TrendIcon ? <TrendIcon className="h-4 w-4" /> : null}
-                          <span>{formatTrendLabel(trend)}</span>
+                      <div className="space-y-1">
+                        <p className="text-xs text-neutral-500">Trend</p>
+                        <div className="mt-1 inline-flex items-center gap-2 text-neutral-300">
+                          {trend === "-" ? null : TrendIcon ? <TrendIcon className="h-4 w-4" /> : null}
+                          <span>{trend === "-" ? "-" : formatTrendLabel(trend)}</span>
                         </div>
                         <p className="mt-1 text-xs text-neutral-500">{getTrendDelta(plan)}</p>
-                      </div>
-                      <div>
-                        <p className="text-neutral-500">Primary Issue</p>
-                        <p className="mt-1 capitalize text-white">{primaryIssue}</p>
                       </div>
                     </div>
 
