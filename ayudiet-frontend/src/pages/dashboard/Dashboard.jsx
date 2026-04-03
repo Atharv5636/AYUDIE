@@ -38,6 +38,8 @@ function Dashboard() {
   const [showMockData, setShowMockData] = useState(true);
   const [appliedPlans, setAppliedPlans] = useState({});
   const [loadingPlans, setLoadingPlans] = useState({});
+  const [activePlanPage, setActivePlanPage] = useState(1);
+  const ACTIVE_PLANS_PER_PAGE = 3;
 
   const filteredPlans = useMemo(() => {
     if (showMockData) return activePlans;
@@ -165,6 +167,80 @@ function Dashboard() {
     if (isNaN(dateObj.getTime())) return null;
 
     return dateObj.toLocaleString();
+  }
+
+  function extractStartEndFromReason(reason) {
+    if (!reason || typeof reason !== "string") return null;
+
+    // Supports patterns like: "55% -> 42%" or "2 → 1"
+    const match = reason.match(
+      /from\s*(-?\d+(?:\.\d+)?)\s*(%|kg)?\s*(?:->|→)\s*(-?\d+(?:\.\d+)?)\s*(%|kg)?/i
+    );
+
+    if (!match) return null;
+
+    const start = Number(match[1]);
+    const end = Number(match[3]);
+    if (!Number.isFinite(start) || !Number.isFinite(end)) return null;
+
+    const unit = match[2] || match[4] || "";
+    return { start, end, unit };
+  }
+
+  function formatPhone(phone) {
+    if (!phone) return null;
+
+    let cleaned = String(phone).replace(/[^0-9]/g, "");
+
+    if (cleaned.startsWith("00")) {
+      cleaned = cleaned.slice(2);
+    } else if (cleaned.startsWith("0")) {
+      cleaned = cleaned.slice(1);
+    }
+
+    if (cleaned.length === 10) {
+      return `91${cleaned}`;
+    }
+
+    if (cleaned.length >= 11 && cleaned.length <= 13) {
+      return cleaned;
+    }
+
+    return null;
+  }
+
+  function buildMessage(plan) {
+    const name = plan?.patient?.name || "there";
+    const issue = (plan?.analysis?.primaryIssue || "progress").toLowerCase();
+
+    if (issue.includes("adherence")) {
+      return `Hi ${name}, I noticed your diet adherence has dropped recently. Let's simplify your plan and get back on track.`;
+    }
+
+    if (issue.includes("energy")) {
+      return `Hi ${name}, your energy levels seem low recently. We may need to adjust your calorie intake.`;
+    }
+
+    if (issue.includes("progress")) {
+      return `Hi ${name}, your progress has slowed. Let's review your plan and make adjustments.`;
+    }
+
+    return `Hi ${name}, I reviewed your plan and would like to help you improve your results.`;
+  }
+
+  function handleSendMessage(plan, formattedPhone) {
+    if (!formattedPhone) {
+      alert("Invalid or missing phone number");
+      return;
+    }
+
+    const message = encodeURIComponent(buildMessage(plan));
+    const url = `https://wa.me/${formattedPhone}?text=${message}`;
+    const newWindow = window.open(url, "_blank");
+
+    if (!newWindow) {
+      alert("Popup blocked. Please allow popups for this site.");
+    }
   }
 
   const getPatientIntelligence = (patient) => {
@@ -304,6 +380,22 @@ function Dashboard() {
       (a, b) => b.attentionScore - a.attentionScore
     );
   }, [plansWithScore]);
+
+  const totalActivePlanPages = Math.max(
+    1,
+    Math.ceil(sortedActivePlans.length / ACTIVE_PLANS_PER_PAGE)
+  );
+
+  const paginatedActivePlans = useMemo(() => {
+    const start = (activePlanPage - 1) * ACTIVE_PLANS_PER_PAGE;
+    return sortedActivePlans.slice(start, start + ACTIVE_PLANS_PER_PAGE);
+  }, [sortedActivePlans, activePlanPage]);
+
+  const activePlansStartIndex = (activePlanPage - 1) * ACTIVE_PLANS_PER_PAGE;
+  const activePlansEndIndex = Math.min(
+    activePlansStartIndex + ACTIVE_PLANS_PER_PAGE,
+    sortedActivePlans.length
+  );
 
   console.log("CRITICAL DEBUG:", {
     total: plansWithScore.length,
@@ -490,6 +582,10 @@ function Dashboard() {
     }
   }, [agenda]);
 
+  useEffect(() => {
+    setActivePlanPage(1);
+  }, [sortedActivePlans.length]);
+
   return (
     <>
       {toast && (
@@ -619,162 +715,232 @@ function Dashboard() {
             <p className="text-sm text-neutral-400">No active plan insights available.</p>
           ) : (
             <div className="space-y-4">
-              {sortedActivePlans.map((plan) => {
+              {paginatedActivePlans.map((plan) => {
                 const planId = String(plan?._id);
                 const trend =
                   plan.analysis?.trend ??
                   plan.analysis?.effectivenessTrend?.trend ??
                   "-";
-                const trendMeta = getTrendMeta(trend);
-                const TrendIcon = trendMeta?.icon;
+                const trendInfo = plan.analysis?.effectivenessTrend || {};
+                const trendPrevious =
+                  typeof trendInfo.previous === "number"
+                    ? trendInfo.previous
+                    : null;
+                const trendCurrent =
+                  typeof trendInfo.current === "number"
+                    ? trendInfo.current
+                    : null;
+                const hasTrendPoints =
+                  typeof trendPrevious === "number" &&
+                  typeof trendCurrent === "number";
+                const reasonTrend = extractStartEndFromReason(plan.analysis?.reason);
+                const chartPrevious = hasTrendPoints
+                  ? trendPrevious
+                  : reasonTrend?.start ?? null;
+                const chartCurrent = hasTrendPoints
+                  ? trendCurrent
+                  : reasonTrend?.end ?? null;
+                const hasChartPoints =
+                  typeof chartPrevious === "number" &&
+                  typeof chartCurrent === "number";
+                const normalizedTrend = String(trend).toLowerCase();
+                const trendDirection =
+                  normalizedTrend.includes("declin")
+                    ? "declining"
+                    : normalizedTrend.includes("improv")
+                      ? "improving"
+                      : "stable";
                 const patientName = plan.patient?.name || "Unknown Patient";
-                const primaryIssue = plan.analysis?.primaryIssue ?? "-";
+                const patientAge =
+                  plan?.patient?.age ??
+                  plan?.patient?.patientProfile?.age ??
+                  plan?.patient?.profile?.age ??
+                  null;
+                const primaryIssue = plan.analysis?.primaryIssue ?? "Not enough data";
                 const adjustments = plan.adjustments || [];
+                const formattedPhone = formatPhone(plan?.patient?.phone);
                 const score =
                   plan.analysis?.effectiveness?.score ??
                   plan.analysis?.effectiveness ??
-                  "-";
+                  null;
+                const numericScore =
+                  typeof score === "number" ? Math.round(score) : null;
+                const hasScoreData = typeof numericScore === "number";
+                const scoreCategory = !hasScoreData
+                  ? "Not enough data"
+                  : numericScore > 80
+                    ? "Good"
+                    : numericScore >= 50
+                      ? "Moderate"
+                      : "Poor";
                 const evaluatedAt =
                   plan.analysis?.computedAt || plan.updatedAt || plan.createdAt;
                 const timeLabel = getRelativeTime(evaluatedAt);
                 const exactTimeLabel = getExactDateTime(evaluatedAt);
-
-                console.log(plan.analysis);
+                const statusNeedsAttention = isImmediateAttention(plan);
 
                 return (
                   <div
                     key={planId}
-                    className="rounded-lg border border-neutral-800 bg-neutral-800/60 p-4"
+                    className="rounded-xl border border-gray-700 bg-neutral-900/80 p-6 shadow-sm"
                   >
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <p className="text-base font-semibold text-white">{patientName}</p>
-                        <p className="mt-1 text-sm text-neutral-400">{plan.title}</p>
-                        <p className="text-[10px] mt-1">
-                          <span
-                            className={
-                              plan.attentionScore >= 6
-                                ? "text-red-400"
-                                : plan.attentionScore >= 4
-                                  ? "text-yellow-400"
-                                  : "text-green-400"
-                            }
-                          >
-                            {getPriorityLabel(plan.attentionScore)}
-                          </span>{" "}
-                          ({plan.attentionScore})
-                        </p>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        {isImmediateAttention(plan) ? (
-                          <span className="rounded-full bg-red-500/12 px-2.5 py-1 text-[11px] font-medium text-red-300">
-                            Needs Immediate Attention
-                          </span>
-                        ) : null}
-                        <span className="rounded-full bg-neutral-700 px-2.5 py-1 text-[11px] font-medium text-neutral-200">
-                          {formatPlanDuration(plan)}
-                        </span>
-                      </div>
+                    <div className="space-y-2">
+                      <p className="text-lg font-bold text-white">{patientName}</p>
+                      <p className="text-sm text-neutral-400">
+                        Age: {patientAge ?? "Not enough data"}
+                      </p>
+                      <span
+                        className={`inline-flex w-fit rounded-full px-2.5 py-1 text-xs font-medium ${
+                          statusNeedsAttention
+                            ? "bg-red-500/15 text-red-300"
+                            : "bg-emerald-500/15 text-emerald-300"
+                        }`}
+                      >
+                        {statusNeedsAttention ? "Needs Attention" : "Stable"}
+                      </span>
+                      <p className="text-xs text-neutral-500">
+                        Last updated {timeLabel || "Not enough data"}
+                      </p>
                     </div>
 
-                    <div className="mt-4 grid gap-3 text-sm md:grid-cols-3">
-                      <div className="space-y-1">
-                        <p className="text-xs text-neutral-500">Primary Issue</p>
-                        <p className="mt-1 text-sm font-semibold text-red-400">
-                          {primaryIssue}
-                        </p>
-                        {adjustments.length > 0 && (
-                          <div className="mt-2 rounded-md bg-emerald-900/20 p-2 border border-emerald-700/30">
-                            <p className="text-[11px] font-bold text-emerald-300 tracking-wide">
-                              ACTION REQUIRED
-                            </p>
-                            <p className="text-xs font-semibold text-emerald-400">
-                              Recommended Changes
-                            </p>
-                            <ul className="mt-1 mb-2 list-disc pl-4 text-xs text-neutral-300 space-y-1">
-                              {adjustments.map((item, index) => (
-                                <li key={index}>{item}</li>
-                              ))}
-                            </ul>
-                            <button
-                              type="button"
-                              disabled={
-                                loadingPlans[planId] ||
-                                appliedPlans[planId] ||
-                                plan.adjustmentsApplied
-                              }
-                              onClick={() => handleApplyChanges(plan)}
-                              className={`mt-2 inline-flex items-center justify-center px-4 rounded-md py-1.5 text-xs font-medium text-white transition ${
-                                appliedPlans[planId] || plan.adjustmentsApplied
-                                  ? "bg-neutral-700 cursor-not-allowed"
-                                  : "bg-emerald-500 hover:bg-emerald-400"
-                              }`}
-                            >
-                              {loadingPlans[planId]
-                                ? "Applying..."
-                                : appliedPlans[planId] || plan.adjustmentsApplied
-                                  ? "Applied"
-                                  : "Apply Changes"}
-                            </button>
-                            {(appliedPlans[planId] || plan.adjustmentsApplied) && adjustments.length > 0 && (
-                              <p className="mt-1 text-[10px] text-neutral-400">
-                                Applied {adjustments.length} change{adjustments.length > 1 ? "s" : ""}
-                              </p>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-xs text-neutral-500">
-                          Effectiveness
-                        </p>
-                        <p className={`mt-1 font-semibold ${
-                          score >= 75
-                            ? "text-green-400"
-                            : score >= 50
-                              ? "text-yellow-400"
-                              : "text-red-400"
-                        }`}>
-                          {score}
-                        </p>
-                      </div>
+                    <div className="mt-6 space-y-2">
+                      <p className="text-xs uppercase tracking-wide text-neutral-500">
+                        Adherence Score
+                      </p>
+                      <p
+                        className={`text-4xl font-bold ${
+                          !hasScoreData
+                            ? "text-neutral-300"
+                            : numericScore > 80
+                              ? "text-emerald-400"
+                              : numericScore >= 50
+                                ? "text-yellow-300"
+                                : "text-red-400"
+                        }`}
+                      >
+                        {hasScoreData ? `${numericScore}%` : "Not enough data"}
+                      </p>
+                      <p className="text-sm text-neutral-400">{scoreCategory}</p>
+                    </div>
+
+                    <div className="mt-6 grid grid-cols-2 gap-4">
                       <div className="space-y-1">
                         <p className="text-xs text-neutral-500">Trend</p>
-                        <div className="mt-1 inline-flex items-center gap-2 text-neutral-300">
-                          {trend === "-" ? null : TrendIcon ? <TrendIcon className="h-4 w-4" /> : null}
-                          <span>{trend === "-" ? "-" : formatTrendLabel(trend)}</span>
-                        </div>
-                        <p className="mt-1 text-xs text-neutral-500">{getTrendDelta(plan)}</p>
+                        <p className="text-sm font-medium capitalize text-neutral-200">
+                          {trend === "-" ? "Not enough data" : trendDirection}
+                        </p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs text-neutral-500">Previous → Current</p>
+                        <p className="text-sm font-medium text-neutral-200">
+                          {hasChartPoints
+                            ? `${chartPrevious}${reasonTrend?.unit || ""} → ${chartCurrent}${reasonTrend?.unit || ""}`
+                            : "Not enough data"}
+                        </p>
                       </div>
                     </div>
-                    {plan.analysis?.reason && (
-                      <div className="mt-2 text-xs text-neutral-400 leading-relaxed">
-                        <span className="text-neutral-500">Reason:</span>{" "}
-                        {plan.analysis.reason}
-                      </div>
-                    )}
-                    {timeLabel && (
-                      <p className="mt-2 text-[11px] text-neutral-400 flex items-center gap-1">
-                        <span className="text-neutral-500">⏱</span>
-                        Last evaluated {timeLabel}
-                        {exactTimeLabel ? ` (${exactTimeLabel})` : ""}
-                      </p>
-                    )}
 
-                    <div className="mt-4">
+                    <div className="mt-6 space-y-2">
+                      <p className="text-xs uppercase tracking-wide text-neutral-500">Issue</p>
+                      <p className="text-sm text-red-300">{primaryIssue}</p>
+                    </div>
+
+                    <div className="mt-6 space-y-2">
+                      <p className="text-xs uppercase tracking-wide text-neutral-500">
+                        Recommended Action
+                      </p>
+                      <ul className="list-disc pl-5 text-sm text-neutral-200">
+                        {adjustments.length > 0 ? (
+                          adjustments.map((item, index) => <li key={index}>{item}</li>)
+                        ) : (
+                          <li>Not enough data</li>
+                        )}
+                      </ul>
+                    </div>
+
+                    <div className="mt-6 grid grid-cols-2 gap-4">
                       <button
                         type="button"
-                        disabled={!plan.analysis}
-                        onClick={() => setSelectedActivePlan(plan)}
-                        className="rounded-lg border border-neutral-700 px-3 py-1.5 text-sm text-neutral-200 transition hover:bg-neutral-700 disabled:cursor-not-allowed disabled:opacity-50"
+                        disabled={
+                          loadingPlans[planId] ||
+                          appliedPlans[planId] ||
+                          plan.adjustmentsApplied
+                        }
+                        onClick={() => handleApplyChanges(plan)}
+                        className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition ${
+                          appliedPlans[planId] || plan.adjustmentsApplied
+                            ? "cursor-not-allowed bg-neutral-700"
+                            : "bg-emerald-500 hover:bg-emerald-400"
+                        }`}
                       >
-                        View Insights
+                        {loadingPlans[planId]
+                          ? "Applying..."
+                          : appliedPlans[planId] || plan.adjustmentsApplied
+                            ? "Applied"
+                            : "Apply Changes"}
                       </button>
+                      <button
+                        type="button"
+                        disabled={!formattedPhone}
+                        onClick={() => handleSendMessage(plan, formattedPhone)}
+                        title={
+                          !plan?.patient
+                            ? "Patient data missing"
+                            : !formattedPhone
+                              ? "Phone number not available"
+                              : "Send WhatsApp message"
+                        }
+                        className={`rounded-lg border border-gray-700 px-4 py-2 text-sm font-medium text-neutral-100 transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                          formattedPhone ? "bg-neutral-800 hover:bg-neutral-700" : "bg-neutral-800"
+                        }`}
+                      >
+                        Message Patient
+                      </button>
+                    </div>
+
+                    <div className="mt-6 border-t border-gray-700 pt-4">
+                      <p className="text-xs text-neutral-500">
+                        Last updated {timeLabel || "Not enough data"}
+                        {exactTimeLabel ? ` (${exactTimeLabel})` : ""}
+                      </p>
                     </div>
                   </div>
                 );
               })}
+
+              <div className="mt-4 border-t border-neutral-800 pt-3">
+                <div className="flex items-center justify-center gap-6 sm:gap-10">
+                  <button
+                    type="button"
+                    onClick={() => setActivePlanPage((p) => Math.max(p - 1, 1))}
+                    disabled={activePlanPage === 1 || sortedActivePlans.length === 0}
+                    className="rounded bg-neutral-700 px-3 py-1 text-xs text-white disabled:opacity-50"
+                  >
+                    Prev
+                  </button>
+
+                  {sortedActivePlans.length > 0 && (
+                    <p className="text-xs text-neutral-400">
+                      Showing {activePlansStartIndex + 1}-{activePlansEndIndex} of{" "}
+                      {sortedActivePlans.length}
+                    </p>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setActivePlanPage((p) => Math.min(p + 1, totalActivePlanPages))
+                    }
+                    disabled={
+                      activePlanPage === totalActivePlanPages ||
+                      sortedActivePlans.length === 0
+                    }
+                    className="rounded bg-neutral-700 px-3 py-1 text-xs text-white disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </div>
