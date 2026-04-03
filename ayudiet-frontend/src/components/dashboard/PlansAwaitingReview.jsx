@@ -48,19 +48,19 @@ function PlansAwaitingReview({
 
   if (plans.length === 0) {
     return (
-      <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-6">
-        <h2 className="mb-2 text-lg font-semibold text-white">Pending Plans</h2>
-        <p className="text-sm text-neutral-400">No plans pending review</p>
+      <div className="rounded-2xl border border-gray-300/60 bg-[#F7F7F5] p-6 shadow-sm">
+        <h2 className="mb-2 text-lg font-semibold text-gray-900">Pending Plans</h2>
+        <p className="text-sm text-gray-600">No plans pending review</p>
       </div>
     );
   }
 
   return (
     <>
-      <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-6">
+      <div className="rounded-2xl border border-gray-300/60 bg-[#F7F7F5] p-6 shadow-sm">
         <div className="mb-4">
-          <h2 className="text-lg font-semibold text-white">Pending Plans</h2>
-          <p className="mt-1 text-sm text-neutral-400">
+          <h2 className="text-lg font-semibold text-gray-900">Pending Plans</h2>
+          <p className="mt-1 text-sm text-gray-600">
             Review plan duration and patient context before approving or rejecting.
           </p>
         </div>
@@ -80,41 +80,41 @@ function PlansAwaitingReview({
             return (
               <div
                 key={plan._id}
-                className="rounded-lg border border-neutral-800 bg-neutral-800/60 p-4"
+                className="rounded-lg border border-gray-200 bg-gray-50 p-4"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="font-medium text-white">{patientName}</p>
-                    <p className="mt-1 text-sm text-neutral-400">{plan.title}</p>
+                    <p className="font-medium text-gray-900">{patientName}</p>
+                    <p className="mt-1 text-sm text-gray-500">{plan.title}</p>
                   </div>
 
-                  <span className="rounded-full bg-neutral-700 px-2.5 py-1 text-[11px] font-medium text-neutral-200">
+                  <span className="rounded-full bg-blue-100 px-2.5 py-1 text-[11px] font-medium text-blue-600">
                     {formatPlanDuration?.(plan)}
                   </span>
                 </div>
 
                 <div className="mt-4 grid gap-3 text-sm md:grid-cols-3">
                   <div>
-                    <p className="text-neutral-500">Plan Duration</p>
-                    <p className="mt-1 text-white">{formatPlanDuration?.(plan)}</p>
+                    <p className="text-gray-500">Plan Duration</p>
+                    <p className="mt-1 text-gray-900">{formatPlanDuration?.(plan)}</p>
                   </div>
                   <div>
-                    <p className="text-neutral-500">Primary Issue</p>
-                    <p className="mt-1 capitalize text-white">{primaryIssue}</p>
+                    <p className="text-gray-500">Primary Issue</p>
+                    <p className="mt-1 capitalize text-gray-900">{primaryIssue}</p>
                   </div>
                   <div>
-                    <p className="text-neutral-500">Trend</p>
-                    <div className="mt-1 inline-flex items-center gap-2 text-white">
+                    <p className="text-gray-500">Trend</p>
+                    <div className="mt-1 inline-flex items-center gap-2 text-gray-900">
                       {TrendIcon ? <TrendIcon className="h-4 w-4" /> : null}
                       <span>{formatTrendLabel?.(trend) || trend}</span>
                     </div>
-                    <p className="mt-1 text-xs text-neutral-500">{trendDelta}</p>
+                    <p className="mt-1 text-xs text-gray-500">{trendDelta}</p>
                   </div>
                 </div>
 
                 <div className="mt-4 flex flex-wrap items-center gap-3">
                   {isImmediateAttention?.(plan) ? (
-                    <span className="rounded-full bg-red-500/12 px-2.5 py-1 text-[11px] font-medium text-red-300">
+                    <span className="rounded-full bg-red-100 px-2.5 py-1 text-[11px] font-medium text-red-600">
                       Needs Immediate Attention
                     </span>
                   ) : null}
@@ -122,7 +122,7 @@ function PlansAwaitingReview({
                   <button
                     disabled={loadingId === plan._id}
                     onClick={() => handleApprove(plan)}
-                    className="rounded-lg bg-green-600 px-3 py-1.5 text-sm text-white transition hover:bg-green-700 disabled:opacity-50"
+                    className="rounded-lg bg-green-500 px-3 py-1.5 text-sm text-white transition hover:bg-green-600 disabled:opacity-50"
                   >
                     {loadingId === plan._id ? "Approving..." : "Approve"}
                   </button>
@@ -130,7 +130,7 @@ function PlansAwaitingReview({
                   <button
                     disabled={loadingId === plan._id}
                     onClick={() => handleReject(plan._id)}
-                    className="rounded-lg bg-red-600 px-3 py-1.5 text-sm text-white transition hover:bg-red-700 disabled:opacity-50"
+                    className="rounded-lg bg-red-500 px-3 py-1.5 text-sm text-white transition hover:bg-red-600 disabled:opacity-50"
                   >
                     {loadingId === plan._id ? "Processing..." : "Reject"}
                   </button>

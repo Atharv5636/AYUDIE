@@ -11,7 +11,7 @@ function Sidebar() {
   };
 
   return (
-    <aside className="w-64 bg-[] border-r border-neutral-800 p-4 text-white">
+    <aside className="w-64 bg-black border-r border-neutral-800 p-4 text-white">
       
       {/* Logo Section */}
       <div className="flex items-center gap-3 mb-6">
@@ -26,7 +26,7 @@ function Sidebar() {
       <nav className="space-y-2">
         <button
           onClick={() => navigate("/dashboard")}
-          className="flex items-center gap-2 w-full p-2 rounded hover:bg-green-700"
+          className="flex w-full items-center gap-2 rounded p-2 hover:bg-neutral-800"
         >
           <LayoutDashboard size={18} />
           Dashboard
@@ -34,7 +34,7 @@ function Sidebar() {
 
         <button
           onClick={() => navigate("/dashboard/patients")}
-          className="flex items-center gap-2 w-full p-2 rounded hover:bg-green-700"
+          className="flex w-full items-center gap-2 rounded p-2 hover:bg-neutral-800"
         >
           <Users size={18} />
           Patients
@@ -42,7 +42,7 @@ function Sidebar() {
 
         <button
           onClick={logout}
-          className="flex items-center gap-2 w-full p-2 rounded hover:bg-red-600 mt-6"
+          className="mt-6 flex w-full items-center gap-2 rounded p-2 hover:bg-neutral-800"
         >
           <LogOut size={18} />
           Logout

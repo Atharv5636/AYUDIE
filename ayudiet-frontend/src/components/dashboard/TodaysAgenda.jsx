@@ -73,11 +73,11 @@ function TodaysAgenda({
   }
 
   return (
-    <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-6">
+    <div className="rounded-2xl border border-gray-300/60 bg-[#F7F7F5] p-6 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-white">Today's Agenda</h2>
-          <p className="mt-1 text-sm text-neutral-400">
+          <h2 className="text-lg font-semibold text-gray-900">Today's Agenda</h2>
+          <p className="mt-1 text-sm text-gray-600">
             Focus on the next visit and track what is already done.
           </p>
         </div>
@@ -85,7 +85,7 @@ function TodaysAgenda({
         <button
           type="button"
           onClick={() => setShowForm((current) => !current)}
-          className="text-sm text-secondary hover:text-white transition"
+          className="text-sm text-gray-600 transition hover:text-gray-900"
         >
           {showForm ? "Close" : "+ Add New"}
         </button>
@@ -94,16 +94,16 @@ function TodaysAgenda({
       {showForm && (
         <form
           onSubmit={handleSubmit}
-          className="mb-4 space-y-4 rounded-lg border border-neutral-800 bg-neutral-800/60 p-4"
+          className="mb-4 space-y-4 rounded-lg border border-gray-200 bg-gray-50 p-4"
         >
           <div className="grid gap-4 md:grid-cols-2">
             <label className="block">
-              <span className="mb-2 block text-sm text-neutral-300">Patient</span>
+              <span className="mb-2 block text-sm text-gray-400">Patient</span>
               <select
                 name="patientId"
                 value={form.patientId}
                 onChange={handleChange}
-                className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-white outline-none"
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-600 outline-none"
               >
                 <option value="">Select patient</option>
                 {patients.map((patient) => (
@@ -115,36 +115,36 @@ function TodaysAgenda({
             </label>
 
             <label className="block">
-              <span className="mb-2 block text-sm text-neutral-300">Time</span>
+              <span className="mb-2 block text-sm text-gray-400">Time</span>
               <input
                 name="time"
                 type="time"
                 value={form.time}
                 onChange={handleChange}
-                className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-white outline-none"
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-600 outline-none"
               />
             </label>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <label className="block">
-              <span className="mb-2 block text-sm text-neutral-300">Type</span>
+              <span className="mb-2 block text-sm text-gray-400">Type</span>
               <input
                 name="type"
                 value={form.type}
                 onChange={handleChange}
                 placeholder="Consultation"
-                className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-white outline-none"
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-600 outline-none"
               />
             </label>
 
             <label className="block">
-              <span className="mb-2 block text-sm text-neutral-300">Status</span>
+              <span className="mb-2 block text-sm text-gray-400">Status</span>
               <select
                 name="status"
                 value={form.status}
                 onChange={handleChange}
-                className="w-full rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-white outline-none"
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-600 outline-none"
               >
                 <option value="upcoming">Upcoming</option>
                 <option value="completed">Completed</option>
@@ -157,7 +157,7 @@ function TodaysAgenda({
           <div className="flex gap-3">
             <button
               type="submit"
-              className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-green-700"
+              className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-800 transition hover:bg-gray-200"
             >
               Add Agenda Item
             </button>
@@ -169,7 +169,7 @@ function TodaysAgenda({
                 setError("");
                 setShowForm(false);
               }}
-              className="rounded-lg border border-neutral-700 px-4 py-2 text-sm text-neutral-200 transition hover:bg-neutral-800"
+              className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-600 transition hover:bg-gray-100"
             >
               Cancel
             </button>
@@ -177,9 +177,9 @@ function TodaysAgenda({
         </form>
       )}
 
-      <div className="space-y-3">
+      <div className="space-y-4">
         {agenda.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-neutral-800 px-4 py-6 text-sm text-neutral-400">
+          <div className="rounded-lg border border-dashed border-gray-300 px-4 py-6 text-sm text-gray-600">
             No agenda items yet. Add one to schedule the next patient interaction.
           </div>
         ) : null}
@@ -187,38 +187,28 @@ function TodaysAgenda({
         {agenda.map((item) => (
           <div
             key={item.id}
-            className={`rounded-lg border px-4 py-3 ${
-              item.id === nextAgendaId
-                ? "border-emerald-500/40 bg-emerald-500/10"
-                : "border-neutral-800 bg-neutral-800/60"
-            }`}
+            className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
           >
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <p className="font-medium text-white">{item.name}</p>
+                  <p className="font-medium text-gray-900">{item.name}</p>
                   {item.id === nextAgendaId && (
-                    <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[11px] font-medium text-emerald-300">
+                    <span className="rounded-full bg-gray-200 px-2 py-0.5 text-[11px] font-medium text-gray-700">
                       Next
                     </span>
                   )}
                 </div>
-                <p className="mt-1 text-sm text-neutral-300">{item.type}</p>
+                <p className="mt-1 text-sm text-gray-600">{item.type}</p>
               </div>
 
-              <span
-                className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${
-                  item.status === "completed"
-                    ? "bg-neutral-700 text-neutral-200"
-                    : "bg-blue-500/15 text-blue-300"
-                }`}
-              >
+              <span className="rounded-full bg-gray-200 px-2.5 py-1 text-[11px] font-medium text-gray-700">
                 {item.status === "completed" ? "Completed" : "Upcoming"}
               </span>
             </div>
 
             <div className="mt-3 flex items-center justify-between gap-4 text-sm">
-              <p className="text-neutral-400">{formatTime(item.time)}</p>
+              <p className="text-gray-600">{formatTime(item.time)}</p>
 
               <div className="flex gap-4">
                 <button
@@ -233,14 +223,14 @@ function TodaysAgenda({
                     console.log("Editing agenda patient:", item);
                     navigate(`/dashboard/patients/${item.patientId}/edit`);
                   }}
-                  className="text-neutral-300 hover:text-white disabled:cursor-not-allowed disabled:text-neutral-500"
+                  className="text-gray-600 hover:text-gray-900 disabled:cursor-not-allowed disabled:text-gray-400"
                 >
                   Edit
                 </button>
 
                 <button
                   onClick={() => onDelete(item.id)}
-                  className="text-red-400 hover:text-red-300"
+                  className="text-red-500 hover:text-red-600"
                 >
                   Delete
                 </button>

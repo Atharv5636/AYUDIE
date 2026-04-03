@@ -25,41 +25,47 @@ function Patients() {
   }, []);
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-4 text-white">Patients</h1>
+    <div className="space-y-4">
+      <h1 className="mb-4 text-2xl font-bold text-gray-900">Patients</h1>
 
       {patients.length === 0 ? (
-        <p className="text-gray-400">No patients found</p>
+        <p className="text-gray-600">No patients found</p>
       ) : (
-        patients.map((p) => (
-          <div
-            key={p._id}
-            className="flex justify-between items-center p-4 bg-neutral-800 rounded mb-2"
-          >
-            <div>
-              <p className="font-semibold text-white">{p.name}</p>
-              <p className="text-sm text-gray-400">Age: {p.age}</p>
-            </div>
-
-            <div className="flex gap-2">
-              {/* VIEW BUTTON */}
-              <button
-                onClick={() => navigate(`/dashboard/patients/${p._id}`)}
-                className="px-4 py-2 bg-blue-600 rounded text-white"
+        <div className="rounded-2xl bg-[#c8d6b7] p-4">
+          <div className="space-y-3">
+            {patients.map((p) => (
+              <div
+                key={p._id}
+                className="w-full rounded-xl border border-gray-300/60 bg-[#F7F7F5] p-4 shadow-sm"
               >
-                View
-              </button>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="font-semibold text-gray-900">{p.name}</p>
+                    <p className="text-sm text-gray-600">Age: {p.age}</p>
+                  </div>
 
-              {/* EDIT BUTTON */}
-              <button
-                onClick={() => navigate(`/dashboard/patients/${p._id}/edit`)}
-                className="px-4 py-2 bg-green-600 rounded text-white"
-              >
-                Edit
-              </button>
-            </div>
+                  <div className="inline-flex items-center gap-2 self-start sm:self-center">
+                    {/* VIEW BUTTON */}
+                    <button
+                      onClick={() => navigate(`/dashboard/patients/${p._id}`)}
+                      className="min-w-[84px] rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-800 transition-all duration-200 hover:bg-gray-900 hover:text-white"
+                    >
+                      View
+                    </button>
+
+                    {/* EDIT BUTTON */}
+                    <button
+                      onClick={() => navigate(`/dashboard/patients/${p._id}/edit`)}
+                      className="min-w-[84px] rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm font-medium text-gray-800 transition-all duration-200 hover:bg-gray-900 hover:text-white"
+                    >
+                      Edit
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
-        ))
+        </div>
       )}
     </div>
   );

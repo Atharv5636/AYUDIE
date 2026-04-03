@@ -594,17 +594,18 @@ function Dashboard() {
         </div>
       )}
 
-      <div className="space-y-8">
+      <div className="min-h-screen bg-gray-50 text-gray-900">
+        <div className="max-w-6xl mx-auto px-6 py-6 space-y-6">
         <div>
-          <h1 className="text-2xl font-semibold text-white">
+          <h1 className="text-2xl font-semibold text-gray-900">
             Dashboard Overview
           </h1>
-          <p className="text-neutral-400 mt-1">
+          <p className="mt-1 text-sm text-gray-600">
             Review decision signals and act on patients who need support
           </p>
           <button
             onClick={() => setShowMockData((prev) => !prev)}
-            className="mt-2 text-xs px-2 py-1 rounded bg-neutral-700 text-white"
+            className="mt-2 rounded border border-gray-300 bg-white px-2 py-1 text-xs text-gray-700 hover:bg-gray-100"
           >
             {showMockData ? "Hide Mock Data" : "Show Mock Data"}
           </button>
@@ -634,41 +635,41 @@ function Dashboard() {
             ].map((card) => (
               <div
                 key={card.title}
-                className="rounded-xl border border-neutral-800 bg-neutral-900 p-5"
+                className="rounded-2xl border border-gray-300/60 bg-[#F7F7F5] p-5 shadow-sm"
               >
-                <p className="text-sm text-neutral-400">{card.title}</p>
-                <p className="mt-2 text-3xl font-semibold text-white">{card.value}</p>
-                <p className="mt-1 text-sm text-neutral-500">{card.note}</p>
+                <p className="text-sm text-gray-600">{card.title}</p>
+                <p className="mt-2 text-3xl font-semibold text-gray-900">{card.value}</p>
+                <p className="mt-1 text-sm text-gray-700">{card.note}</p>
               </div>
             ))}
           </div>
 
-          <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-5">
+          <div className="rounded-2xl border border-gray-300/60 bg-[#F7F7F5] p-5 shadow-sm">
             <div className="mb-4">
-              <h2 className="text-lg font-semibold text-white">Top Critical Patients</h2>
-              <p className="mt-1 text-sm text-neutral-400">
+              <h2 className="text-lg font-semibold text-gray-900">Top Critical Patients</h2>
+              <p className="mt-1 text-sm text-gray-600">
                 Highest-priority cases based on score, trend, and adherence risk.
               </p>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-4">
               {plansWithScore.length === 0 ? (
-                <p className="text-sm text-neutral-400">No data available</p>
+                <p className="text-sm text-gray-600">No data available</p>
               ) : criticalPatients.length === 0 ? (
-                <p className="text-sm text-neutral-400">No high-risk patients</p>
+                <p className="text-sm text-gray-600">No high-risk patients</p>
               ) : (
                 criticalPatients.map((plan) => (
                   <div
                     key={plan._id}
-                    className="rounded-lg border border-neutral-800 bg-neutral-800/60 px-4 py-3"
+                    className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
                   >
-                    <p className="text-sm text-white font-medium">
+                    <p className="text-sm font-medium text-gray-900">
                       {plan.patient?.name || "Unknown"}
                     </p>
-                    <p className="text-xs text-neutral-400">
+                    <p className="text-xs text-gray-600">
                       {plan.analysis?.primaryIssue || "-"} • {plan.analysis?.trend || "-"}
                     </p>
-                    <p className="text-xs text-red-400">
+                    <p className="text-xs text-gray-600">
                       Priority: {plan.attentionScore}
                     </p>
                   </div>
@@ -677,7 +678,7 @@ function Dashboard() {
             </div>
           </div>
         </div>
-<div className="grid gap-6 xl:grid-cols-[1fr_1.2fr]">
+        <div className="grid gap-6 xl:grid-cols-[1fr_1.2fr]">
           <TodaysAgenda
             agenda={agenda}
             patients={patients}
@@ -703,16 +704,16 @@ function Dashboard() {
           />
         </div>
 
-        <div className="rounded-xl border border-neutral-800 bg-neutral-900 p-6">
-          <div className="mb-4">
-            <h2 className="text-lg font-semibold text-white">Active Plan Insights</h2>
-            <p className="mt-1 text-sm text-neutral-400">
+        <div className="border-t border-gray-200 pt-4 space-y-4">
+          <div className="space-y-1">
+            <h2 className="text-lg font-semibold text-gray-900">Active Plan Insights</h2>
+            <p className="text-sm text-gray-600">
               Review live adaptive analysis for patients on active plans.
             </p>
           </div>
 
           {sortedActivePlans.length === 0 ? (
-            <p className="text-sm text-neutral-400">No active plan insights available.</p>
+            <p className="text-sm text-gray-600">No active plan insights available.</p>
           ) : (
             <div className="space-y-4">
               {paginatedActivePlans.map((plan) => {
@@ -782,145 +783,147 @@ function Dashboard() {
                 return (
                   <div
                     key={planId}
-                    className="rounded-xl border border-gray-700 bg-neutral-900/80 p-6 shadow-sm"
+                    className="bg-[#F7F7F5] border border-gray-300/60 rounded-2xl p-6 shadow-sm space-y-4 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 font-sans"
                   >
-                    <div className="space-y-2">
-                      <p className="text-lg font-bold text-white">{patientName}</p>
-                      <p className="text-sm text-neutral-400">
-                        Age: {patientAge ?? "Not enough data"}
-                      </p>
-                      <span
-                        className={`inline-flex w-fit rounded-full px-2.5 py-1 text-xs font-medium ${
-                          statusNeedsAttention
-                            ? "bg-red-500/15 text-red-300"
-                            : "bg-emerald-500/15 text-emerald-300"
-                        }`}
-                      >
-                        {statusNeedsAttention ? "Needs Attention" : "Stable"}
-                      </span>
-                      <p className="text-xs text-neutral-500">
-                        Last updated {timeLabel || "Not enough data"}
-                      </p>
-                    </div>
+                    <div className="grid grid-cols-4 gap-6">
+                      <div className="col-span-3 space-y-4">
+                        <div className="space-y-1.5">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-baseline gap-3">
+                              <p className="text-lg font-semibold text-gray-900">{patientName}</p>
+                              <p className="text-xs text-gray-400">
+                                Age: {patientAge ?? "—"}
+                              </p>
+                            </div>
+                            <span className="inline-flex rounded-full bg-gray-200 px-2.5 py-1 text-xs font-medium text-gray-700">
+                              {hasScoreData
+                                ? numericScore < 50
+                                  ? "Needs Attention"
+                                  : "Stable"
+                                : statusNeedsAttention
+                                  ? "Needs Attention"
+                                  : "Stable"}
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-400">
+                            Last updated {timeLabel || "—"}
+                          </p>
+                        </div>
 
-                    <div className="mt-6 space-y-2">
-                      <p className="text-xs uppercase tracking-wide text-neutral-500">
-                        Adherence Score
-                      </p>
-                      <p
-                        className={`text-4xl font-bold ${
-                          !hasScoreData
-                            ? "text-neutral-300"
-                            : numericScore > 80
-                              ? "text-emerald-400"
-                              : numericScore >= 50
-                                ? "text-yellow-300"
-                                : "text-red-400"
-                        }`}
-                      >
-                        {hasScoreData ? `${numericScore}%` : "Not enough data"}
-                      </p>
-                      <p className="text-sm text-neutral-400">{scoreCategory}</p>
-                    </div>
+                        <div className="rounded-lg bg-white px-4 py-3 shadow-sm space-y-1.5">
+                          <p className="text-xs uppercase tracking-wide text-gray-400">
+                            Adherence Score
+                          </p>
+                          <p className="mt-1 text-[34px] font-bold tracking-tight leading-tight text-gray-900">
+                            {hasScoreData ? `${numericScore}%` : "—"}
+                          </p>
+                          <p className="text-sm text-gray-600">{scoreCategory || "—"}</p>
+                        </div>
 
-                    <div className="mt-6 grid grid-cols-2 gap-4">
-                      <div className="space-y-1">
-                        <p className="text-xs text-neutral-500">Trend</p>
-                        <p className="text-sm font-medium capitalize text-neutral-200">
-                          {trend === "-" ? "Not enough data" : trendDirection}
-                        </p>
+                        <div className="space-y-1.5">
+                          <p className="text-xs uppercase tracking-wide text-gray-400">Issue</p>
+                          <p className="text-sm text-gray-600">
+                            {primaryIssue && primaryIssue !== "Not enough data"
+                              ? primaryIssue
+                              : "—"}
+                          </p>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <p className="text-xs uppercase tracking-wide text-gray-400">
+                            Recommended Action
+                          </p>
+                          <ul className="list-disc pl-5 space-y-1 text-sm text-gray-600">
+                            {adjustments.length > 0 ? (
+                              adjustments.map((item, index) => <li key={index}>{item}</li>)
+                            ) : (
+                              <li>—</li>
+                            )}
+                          </ul>
+                        </div>
+
+                        <div className="mt-2">
+                          <div className="flex items-center gap-3">
+                            <button
+                              type="button"
+                              disabled={
+                                loadingPlans[planId] ||
+                                appliedPlans[planId] ||
+                                plan.adjustmentsApplied
+                              }
+                              onClick={() => handleApplyChanges(plan)}
+                              className={`rounded-md px-4 py-1.5 text-xs font-semibold transition-all duration-150 active:scale-95 shadow-sm hover:shadow-md ${
+                                appliedPlans[planId] || plan.adjustmentsApplied
+                                  ? "cursor-not-allowed bg-gray-200 text-gray-400"
+                                  : "bg-lime-400 text-black hover:bg-lime-500"
+                              }`}
+                            >
+                              {loadingPlans[planId]
+                                ? "Applying..."
+                                : appliedPlans[planId] || plan.adjustmentsApplied
+                                  ? "Applied"
+                                  : "Apply Changes"}
+                            </button>
+
+                            <button
+                              type="button"
+                              disabled={!formattedPhone}
+                              onClick={() => handleSendMessage(plan, formattedPhone)}
+                              title={
+                                !plan?.patient
+                                  ? "Patient data missing"
+                                  : !formattedPhone
+                                    ? "Phone number not available"
+                                    : "Send WhatsApp message"
+                              }
+                              className={`rounded-md px-4 py-1.5 text-xs transition-all duration-200 ease-in-out active:scale-95 focus:outline-none focus:ring-2 focus:ring-gray-300 disabled:cursor-not-allowed disabled:opacity-60 ${
+                                formattedPhone
+                                  ? "border border-gray-300 bg-gray-100 text-gray-800 hover:bg-gray-900 hover:text-white"
+                                  : "bg-gray-200 text-gray-400"
+                              }`}
+                            >
+                              Message Patient
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                      <div className="space-y-1">
-                        <p className="text-xs text-neutral-500">Previous → Current</p>
-                        <p className="text-sm font-medium text-neutral-200">
-                          {hasChartPoints
-                            ? `${chartPrevious}${reasonTrend?.unit || ""} → ${chartCurrent}${reasonTrend?.unit || ""}`
-                            : "Not enough data"}
-                        </p>
+
+                      <div className="col-span-1">
+                        <div className="min-h-full rounded-lg bg-white p-3 shadow-sm space-y-4 flex flex-col justify-between">
+                          <div className="space-y-1.5">
+                            <p className="text-xs uppercase tracking-wide text-gray-400">Trend</p>
+                            <p className="text-sm capitalize text-gray-600">
+                              {trend === "-" ? "—" : trendDirection}
+                            </p>
+                          </div>
+                          <div className="space-y-1.5">
+                            <p className="text-xs tracking-wide text-gray-400">Change</p>
+                            <p className="text-sm text-gray-600">
+                              {hasChartPoints
+                                ? `${chartPrevious}${reasonTrend?.unit || ""} → ${chartCurrent}${reasonTrend?.unit || ""}`
+                                : "—"}
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-
-                    <div className="mt-6 space-y-2">
-                      <p className="text-xs uppercase tracking-wide text-neutral-500">Issue</p>
-                      <p className="text-sm text-red-300">{primaryIssue}</p>
-                    </div>
-
-                    <div className="mt-6 space-y-2">
-                      <p className="text-xs uppercase tracking-wide text-neutral-500">
-                        Recommended Action
-                      </p>
-                      <ul className="list-disc pl-5 text-sm text-neutral-200">
-                        {adjustments.length > 0 ? (
-                          adjustments.map((item, index) => <li key={index}>{item}</li>)
-                        ) : (
-                          <li>Not enough data</li>
-                        )}
-                      </ul>
-                    </div>
-
-                    <div className="mt-6 grid grid-cols-2 gap-4">
-                      <button
-                        type="button"
-                        disabled={
-                          loadingPlans[planId] ||
-                          appliedPlans[planId] ||
-                          plan.adjustmentsApplied
-                        }
-                        onClick={() => handleApplyChanges(plan)}
-                        className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition ${
-                          appliedPlans[planId] || plan.adjustmentsApplied
-                            ? "cursor-not-allowed bg-neutral-700"
-                            : "bg-emerald-500 hover:bg-emerald-400"
-                        }`}
-                      >
-                        {loadingPlans[planId]
-                          ? "Applying..."
-                          : appliedPlans[planId] || plan.adjustmentsApplied
-                            ? "Applied"
-                            : "Apply Changes"}
-                      </button>
-                      <button
-                        type="button"
-                        disabled={!formattedPhone}
-                        onClick={() => handleSendMessage(plan, formattedPhone)}
-                        title={
-                          !plan?.patient
-                            ? "Patient data missing"
-                            : !formattedPhone
-                              ? "Phone number not available"
-                              : "Send WhatsApp message"
-                        }
-                        className={`rounded-lg border border-gray-700 px-4 py-2 text-sm font-medium text-neutral-100 transition disabled:cursor-not-allowed disabled:opacity-60 ${
-                          formattedPhone ? "bg-neutral-800 hover:bg-neutral-700" : "bg-neutral-800"
-                        }`}
-                      >
-                        Message Patient
-                      </button>
-                    </div>
-
-                    <div className="mt-6 border-t border-gray-700 pt-4">
-                      <p className="text-xs text-neutral-500">
-                        Last updated {timeLabel || "Not enough data"}
-                        {exactTimeLabel ? ` (${exactTimeLabel})` : ""}
-                      </p>
                     </div>
                   </div>
                 );
               })}
 
-              <div className="mt-4 border-t border-neutral-800 pt-3">
+              <div className="mt-4 border-t border-gray-200 pt-3">
                 <div className="flex items-center justify-center gap-6 sm:gap-10">
                   <button
                     type="button"
                     onClick={() => setActivePlanPage((p) => Math.max(p - 1, 1))}
                     disabled={activePlanPage === 1 || sortedActivePlans.length === 0}
-                    className="rounded bg-neutral-700 px-3 py-1 text-xs text-white disabled:opacity-50"
+                    className="rounded border border-gray-300 bg-white px-3 py-1 text-xs text-gray-700 disabled:opacity-50"
                   >
                     Prev
                   </button>
 
                   {sortedActivePlans.length > 0 && (
-                    <p className="text-xs text-neutral-400">
+                    <p className="text-xs text-gray-500">
                       Showing {activePlansStartIndex + 1}-{activePlansEndIndex} of{" "}
                       {sortedActivePlans.length}
                     </p>
@@ -935,7 +938,7 @@ function Dashboard() {
                       activePlanPage === totalActivePlanPages ||
                       sortedActivePlans.length === 0
                     }
-                    className="rounded bg-neutral-700 px-3 py-1 text-xs text-white disabled:opacity-50"
+                    className="rounded border border-gray-300 bg-white px-3 py-1 text-xs text-gray-700 disabled:opacity-50"
                   >
                     Next
                   </button>
@@ -954,6 +957,7 @@ function Dashboard() {
         />
 
         {message && <p className="text-red-400">{message}</p>}
+      </div>
       </div>
 
       {selectedActivePlan ? (
