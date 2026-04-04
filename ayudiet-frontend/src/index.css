@@ -11,7 +11,7 @@ body,
 
 /* Global app background */
 body {
-  background-color: #f9fafb;
+  background-color: #f5f5f4;
   color: #111827;
   font-family: "DM Sans", "Segoe UI", Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -33,21 +33,4 @@ h3,
 h4 {
   font-family: "Space Grotesk", "DM Sans", "Segoe UI", Helvetica, Arial, sans-serif;
   letter-spacing: -0.012em;
-}
-
-/* Richer neutral tones to avoid flat/dull gray text */
-.text-gray-400 {
-  color: #6b7d95 !important;
-}
-
-.text-gray-500 {
-  color: #566a84 !important;
-}
-
-.text-gray-600 {
-  color: #3d5471 !important;
-}
-
-.text-gray-700 {
-  color: #2b4462 !important;
 }

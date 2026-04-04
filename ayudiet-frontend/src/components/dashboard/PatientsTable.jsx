@@ -30,12 +30,12 @@ function PatientsTable({
   console.log("Patients count:", patients?.length || 0);
 
   return (
-    <div className="overflow-hidden rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] shadow-sm">
+    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-200 hover:shadow-md">
       <div className="border-b border-gray-200 px-6 py-4">
         <h2 className="inline-block rounded-md bg-yellow-300 px-3 py-1 text-lg font-semibold text-gray-900">
           Patient Intelligence
         </h2>
-        <p className="mt-2 inline-block rounded bg-white/90 px-2 py-0.5 text-sm text-gray-800">
+        <p className="mt-2 text-sm text-gray-600">
           Review effectiveness, dominant issue, and trend before opening a case.
         </p>
       </div>
@@ -43,11 +43,11 @@ function PatientsTable({
       <table className="w-full text-sm">
         <thead className="bg-gray-100 text-gray-600">
           <tr>
-            <th className="border-r-2 border-gray-300 px-4 py-3 text-left">Name</th>
-            <th className="border-r-2 border-gray-300 px-4 py-3 text-left">Age</th>
-            <th className="border-r-2 border-gray-300 px-4 py-3 text-left">Effectiveness</th>
-            <th className="border-r-2 border-gray-300 px-4 py-3 text-left">Primary Issue</th>
-            <th className="border-r-2 border-gray-300 px-4 py-3 text-left">Trend</th>
+            <th className="border-r border-gray-200 px-4 py-3 text-left">Name</th>
+            <th className="border-r border-gray-200 px-4 py-3 text-left">Age</th>
+            <th className="border-r border-gray-200 px-4 py-3 text-left">Effectiveness</th>
+            <th className="border-r border-gray-200 px-4 py-3 text-left">Primary Issue</th>
+            <th className="border-r border-gray-200 px-4 py-3 text-left">Trend</th>
             <th className="px-4 py-3 text-left">Actions</th>
           </tr>
         </thead>
@@ -70,17 +70,17 @@ function PatientsTable({
             return (
               <tr
                 key={patient._id}
-                className="border-t border-gray-200 transition hover:bg-white/70"
+                className="border-t border-gray-200 transition hover:bg-gray-50"
               >
-                <td className="border-r-2 border-gray-300 px-4 py-3 text-gray-900">{patient.name}</td>
-                <td className="border-r-2 border-gray-300 px-4 py-3 text-gray-600">{patient.age ?? "-"}</td>
-                <td className="border-r-2 border-gray-300 px-4 py-3 text-gray-600">
+                <td className="border-r border-gray-200 px-4 py-3 text-gray-900">{patient.name}</td>
+                <td className="border-r border-gray-200 px-4 py-3 text-gray-600">{patient.age ?? "-"}</td>
+                <td className="border-r border-gray-200 px-4 py-3 text-gray-600">
                   {typeof score === "number" ? score : "-"}
                 </td>
-                <td className="border-r-2 border-gray-300 px-4 py-3 capitalize text-gray-600">
+                <td className="border-r border-gray-200 px-4 py-3 capitalize text-gray-600">
                   {primaryIssue}
                 </td>
-                <td className="border-r-2 border-gray-300 px-4 py-3 text-gray-600">
+                <td className="border-r border-gray-200 px-4 py-3 text-gray-600">
                   <div className="inline-flex items-center gap-2">
                     {TrendIcon ? <TrendIcon className="h-4 w-4" /> : null}
                     <span>{formatTrendLabel?.(trend) || trend}</span>
@@ -91,7 +91,7 @@ function PatientsTable({
                   <div className="flex gap-4">
                     <Link
                       to={`/dashboard/patients/${patient._id}`}
-                      className="text-gray-600 hover:text-gray-900 hover:underline"
+                      className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-800 transition hover:bg-black hover:text-white"
                     >
                       View
                     </Link>
@@ -108,14 +108,14 @@ function PatientsTable({
 
                         navigate(`/dashboard/patients/${patient._id}/edit`);
                       }}
-                      className="text-gray-600 hover:text-gray-900 hover:underline"
+                      className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-800 transition hover:bg-black hover:text-white"
                     >
                       Edit
                     </button>
 
                     <button
                       onClick={() => onDelete(patient._id)}
-                      className="text-red-500 hover:text-red-600 hover:underline"
+                      className="rounded-md bg-red-500 px-4 py-2 text-sm text-white transition hover:bg-red-600"
                     >
                       Delete
                     </button>
@@ -133,7 +133,7 @@ function PatientsTable({
         <button
           onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
           disabled={currentPage === 1 || !patients || patients.length === 0}
-          className="rounded border border-gray-300 bg-white px-3 py-1 text-xs text-gray-700 disabled:opacity-50"
+          className="rounded-md border border-gray-300 bg-white px-3 py-1 text-xs text-gray-800 transition hover:bg-black hover:text-white disabled:opacity-50"
         >
           Prev
         </button>
@@ -147,7 +147,7 @@ function PatientsTable({
         <button
           onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
           disabled={currentPage === totalPages || !patients || patients.length === 0}
-          className="rounded border border-gray-300 bg-white px-3 py-1 text-xs text-gray-700 disabled:opacity-50"
+          className="rounded-md border border-gray-300 bg-white px-3 py-1 text-xs text-gray-800 transition hover:bg-black hover:text-white disabled:opacity-50"
         >
           Next
         </button>

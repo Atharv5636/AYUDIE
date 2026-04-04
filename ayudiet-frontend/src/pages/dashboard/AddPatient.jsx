@@ -79,8 +79,8 @@ function AddPatient() {
 
   return (
     <div className="w-full">
-      <div className="rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 p-10">
-        <h1 className="text-2xl font-semibold text-white text-center mb-10">
+      <div className="rounded-2xl border border-gray-200 bg-white p-10 shadow-sm transition-all duration-200 hover:shadow-md">
+        <h1 className="mb-10 text-center text-2xl font-semibold text-gray-900">
           Patient Ayurvedic Assessment
         </h1>
 
@@ -138,13 +138,12 @@ function AddPatient() {
             />
           </Section>
 
-          {error && <p className="text-red-400 text-sm">{error}</p>}
+          {error && <p className="text-sm text-gray-600">{error}</p>}
 
           <div className="text-center">
             <button
               disabled={loading}
-              className="px-10 py-3 rounded-xl bg-green-600 text-white
-              hover:bg-green-700 transition font-medium"
+              className="rounded-md bg-yellow-400 px-4 py-2 font-semibold text-black transition hover:bg-yellow-500"
             >
               {loading ? "Submitting..." : "Submit Assessment"}
             </button>
@@ -161,11 +160,11 @@ export default AddPatient;
 
 function Section({ title, children }) {
   return (
-    <div className="space-y-6">
-      <h2 className="text-lg font-semibold text-white border-l-4 border-green-500 pl-3">
+    <div className="space-y-4 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md">
+      <h2 className="text-gray-900 font-semibold">
         {title}
       </h2>
-      {children}
+      <div className="grid gap-4">{children}</div>
     </div>
   );
 }
@@ -173,15 +172,15 @@ function Section({ title, children }) {
 function Input({ label, ...props }) {
   return (
     <div>
-      <label className="block text-sm text-gray-300 mb-1">
+      <label className="mb-1 block text-xs uppercase tracking-wide text-gray-400">
         {label}
       </label>
 
       <input
         {...props}
-        className="w-full rounded-lg bg-white/90 px-4 py-2
-        text-black placeholder:text-gray-400
-        outline-none focus:ring-2 focus:ring-green-500"
+        className="w-full rounded-md border border-gray-300 bg-white px-4 py-2
+        text-sm text-gray-600 placeholder:text-gray-400
+        outline-none focus:border-gray-400"
       />
     </div>
   );
@@ -190,14 +189,14 @@ function Input({ label, ...props }) {
 function Select({ label, options, ...props }) {
   return (
     <div>
-      <label className="block text-sm text-gray-300 mb-1">
+      <label className="mb-1 block text-xs uppercase tracking-wide text-gray-400">
         {label}
       </label>
 
       <select
         {...props}
-        className="w-full rounded-lg bg-white/90 px-4 py-2
-        text-black outline-none focus:ring-2 focus:ring-green-500"
+        className="w-full rounded-md border border-gray-300 bg-white px-4 py-2
+        text-sm text-gray-600 outline-none focus:border-gray-400"
       >
         <option value="">Select</option>
         {options.map((o) => (

@@ -1,10 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { AlertTriangle, ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
-import agendaFrame from "../../assets/agenda-botanical-frame.png";
-import lowAdherenceIcon from "../../assets/low-adherence-icon.png";
-import trendStableImage from "../../assets/trend-stable.png";
-import trendDecliningImage from "../../assets/trend-declining.png";
-import trendImprovingImage from "../../assets/trend-improving.png";
+import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
 
 import PlansAwaitingReview from "../../components/dashboard/PlansAwaitingReview";
 import TodaysAgenda from "../../components/dashboard/TodaysAgenda";
@@ -355,37 +350,37 @@ function Dashboard() {
 
   const getTrendTone = (trend) => {
     if (trend === "declining" || trend === "slight_decline") {
-      return "text-red-300";
+      return "text-gray-700";
     }
 
     if (trend === "improving" || trend === "slight_improvement") {
-      return "text-green-300";
+      return "text-gray-700";
     }
 
-    return "text-neutral-300";
+    return "text-gray-700";
   };
 
   const getTrendMeta = (trend) => {
     if (trend === "declining" || trend === "slight_decline") {
       return {
         icon: ArrowDownRight,
-        className: "text-red-300",
-        chipClassName: "bg-red-500/10 text-red-300",
+        className: "text-gray-700",
+        chipClassName: "bg-black text-white",
       };
     }
 
     if (trend === "improving" || trend === "slight_improvement") {
       return {
         icon: ArrowUpRight,
-        className: "text-green-300",
-        chipClassName: "bg-green-500/10 text-green-300",
+        className: "text-gray-700",
+        chipClassName: "bg-gray-100 text-gray-700",
       };
     }
 
     return {
       icon: Minus,
-      className: "text-neutral-300",
-      chipClassName: "bg-neutral-700 text-neutral-200",
+      className: "text-gray-700",
+      chipClassName: "bg-gray-100 text-gray-700",
     };
   };
 
@@ -653,7 +648,7 @@ function Dashboard() {
   return (
     <>
       {toast && (
-        <div className="fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded shadow z-50">
+        <div className="fixed top-4 right-4 z-50 rounded-md bg-black px-4 py-2 text-white shadow-sm">
           {toast}
         </div>
       )}
@@ -669,7 +664,7 @@ function Dashboard() {
           </p>
           <button
             onClick={() => setShowMockData((prev) => !prev)}
-            className="mt-2 rounded border border-gray-300 bg-white px-2 py-1 text-xs text-gray-700 hover:bg-gray-100"
+            className="mt-2 rounded-md border border-gray-300 bg-white px-3 py-1 text-xs text-gray-800 transition hover:bg-black hover:text-white"
           >
             {showMockData ? "Hide Mock Data" : "Show Mock Data"}
           </button>
@@ -702,48 +697,11 @@ function Dashboard() {
             ].map((card) => (
               <div
                 key={card.key}
-                className="relative flex min-h-[300px] flex-col overflow-hidden rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-5 shadow-sm"
+                className="relative flex min-h-[300px] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md"
               >
-                {card.key === "needs-attention" ? (
-                  <div className="pointer-events-none absolute bottom-5 left-1/2 -translate-x-1/2">
-                    <AlertTriangle className="h-24 w-24 text-red-700/45 fill-red-700/15 drop-shadow-sm" />
-                  </div>
-                ) : card.key === "declining-plans" ? (
-                  <div className="pointer-events-none absolute bottom-5 left-1/2 -translate-x-1/2">
-                    <svg
-                      viewBox="0 0 120 90"
-                      aria-hidden="true"
-                      className="h-24 w-28 text-gray-800/70 drop-shadow-sm"
-                      fill="none"
-                    >
-                      <path
-                        d="M8 12 45 48 63 30 102 69"
-                        stroke="currentColor"
-                        strokeWidth="8"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                      <path
-                        d="M68 69h34V35"
-                        stroke="currentColor"
-                        strokeWidth="8"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </div>
-                ) : card.key === "low-adherence" ? (
-                  <div className="pointer-events-none absolute bottom-5 left-1/2 -translate-x-1/2">
-                    <img
-                      src={lowAdherenceIcon}
-                      alt="Low adherence icon"
-                      className="h-24 w-36 object-contain opacity-80 drop-shadow-sm"
-                    />
-                  </div>
-                ) : null}
-                <p className="text-sm font-medium text-gray-800">{card.title}</p>
+                <p className="text-gray-900 font-semibold">{card.title}</p>
 
-                <div className="flex flex-1 flex-col items-center justify-center pb-20 text-center">
+                <div className="flex flex-1 flex-col items-center justify-center text-center">
                   <SevenSegmentNumber value={card.value} />
                   <p className="mt-3 text-sm text-gray-700">{card.note}</p>
                 </div>
@@ -751,7 +709,7 @@ function Dashboard() {
             ))}
           </div>
 
-          <div className="rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-5 shadow-sm xl:col-span-4 2xl:col-span-3">
+          <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md xl:col-span-4 2xl:col-span-3">
             <div className="mb-4">
               <h2 className="text-lg font-semibold text-gray-900">Top Critical Patients</h2>
               <p className="mt-1 text-sm text-gray-600">
@@ -768,7 +726,7 @@ function Dashboard() {
                 paginatedCriticalPatients.map((plan) => (
                   <div
                     key={plan._id}
-                    className="rounded-lg border-[2px] border-gray-300/60 bg-[#FFFDF8] p-4 shadow-sm"
+                    className="rounded-xl border border-gray-200 bg-white p-4"
                   >
                     <p className="text-sm font-medium text-gray-900">
                       {plan.patient?.name || "Unknown"}
@@ -792,7 +750,7 @@ function Dashboard() {
                   disabled={
                     criticalPatientPage === 1 || sortedCriticalPatients.length === 0
                   }
-                  className="rounded border border-gray-300 bg-white px-3 py-1 text-xs text-gray-700 disabled:opacity-50"
+                  className="rounded-md border border-gray-300 bg-white px-3 py-1 text-xs text-gray-800 transition hover:bg-black hover:text-white disabled:opacity-50"
                 >
                   Prev
                 </button>
@@ -815,7 +773,7 @@ function Dashboard() {
                     criticalPatientPage === totalCriticalPatientPages ||
                     sortedCriticalPatients.length === 0
                   }
-                  className="rounded border border-gray-300 bg-white px-3 py-1 text-xs text-gray-700 disabled:opacity-50"
+                  className="rounded-md border border-gray-300 bg-white px-3 py-1 text-xs text-gray-800 transition hover:bg-black hover:text-white disabled:opacity-50"
                 >
                   Next
                 </button>
@@ -930,12 +888,6 @@ function Dashboard() {
                     : normalizedTrend.includes("improv")
                       ? "improving"
                       : "stable";
-                const trendGraphImage =
-                  trendDirection === "declining"
-                    ? trendDecliningImage
-                    : trendDirection === "improving"
-                      ? trendImprovingImage
-                      : trendStableImage;
                 const patientName = plan.patient?.name || "Unknown Patient";
                 const patientAge =
                   plan?.patient?.age ??
@@ -968,7 +920,7 @@ function Dashboard() {
                 return (
                   <div
                     key={planId}
-                    className="rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-6 shadow-sm space-y-4 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 font-sans"
+                    className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-all duration-200 hover:shadow-md space-y-4"
                   >
                     <div className="grid grid-cols-4 gap-6">
                       <div className="col-span-3 space-y-4">
@@ -982,7 +934,11 @@ function Dashboard() {
                                 Age: {patientAge ?? "-"}
                               </p>
                             </div>
-                            <span className="inline-flex rounded-full bg-gray-200 px-2.5 py-1 text-xs font-medium text-gray-700">
+                            <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${
+                              (hasScoreData && numericScore < 50) || (!hasScoreData && statusNeedsAttention)
+                                ? "bg-black text-white"
+                                : "bg-gray-100 text-gray-700"
+                            }`}>
                               {hasScoreData
                                 ? numericScore < 50
                                   ? "Needs Attention"
@@ -997,7 +953,7 @@ function Dashboard() {
                           </p>
                         </div>
 
-                        <div className="rounded-lg border-[2px] border-gray-300/60 bg-[#FFFDF8] px-4 py-3 shadow-sm space-y-1.5">
+                        <div className="rounded-xl bg-gray-50 px-4 py-3 space-y-1.5">
                           <p className="text-xs uppercase tracking-wide text-gray-400">
                             Adherence Score
                           </p>
@@ -1042,7 +998,7 @@ function Dashboard() {
                               className={`rounded-md px-4 py-1.5 text-xs font-semibold transition-all duration-150 active:scale-95 shadow-sm hover:shadow-md ${
                                 appliedPlans[planId] || plan.adjustmentsApplied
                                   ? "cursor-not-allowed bg-gray-200 text-gray-400"
-                                  : "bg-lime-400 text-black hover:bg-lime-500"
+                                  : "bg-yellow-400 text-black hover:bg-yellow-500"
                               }`}
                             >
                               {loadingPlans[planId]
@@ -1063,9 +1019,9 @@ function Dashboard() {
                                     ? "Phone number not available"
                                     : "Send WhatsApp message"
                               }
-                              className={`rounded-md px-4 py-1.5 text-xs transition-all duration-200 ease-in-out active:scale-95 focus:outline-none focus:ring-2 focus:ring-gray-300 disabled:cursor-not-allowed disabled:opacity-60 ${
+                              className={`rounded-md border border-gray-300 px-4 py-1.5 text-xs transition-all duration-200 ease-in-out active:scale-95 focus:outline-none focus:ring-2 focus:ring-gray-300 disabled:cursor-not-allowed disabled:opacity-60 ${
                                 formattedPhone
-                                  ? "border border-gray-300 bg-gray-100 text-gray-800 hover:bg-gray-900 hover:text-white"
+                                  ? "bg-white text-gray-800 hover:bg-black hover:text-white"
                                   : "bg-gray-200 text-gray-400"
                               }`}
                             >
@@ -1076,7 +1032,7 @@ function Dashboard() {
                       </div>
 
                       <div className="col-span-1">
-                        <div className="min-h-full rounded-lg border-[2px] border-gray-300/60 bg-[#FFFDF8] p-3 shadow-sm space-y-4 flex flex-col justify-between">
+                        <div className="min-h-full rounded-xl bg-gray-50 p-3 space-y-4 flex flex-col justify-between">
                           <div className="space-y-1.5">
                             <p className="text-xs uppercase tracking-wide text-gray-400">Trend</p>
                             <p className="text-sm capitalize text-gray-600">
@@ -1084,12 +1040,22 @@ function Dashboard() {
                             </p>
                           </div>
 
-                          <div className="flex h-24 items-center justify-center overflow-hidden rounded-md border border-gray-200 bg-white p-1">
-                            <img
-                              src={trendGraphImage}
-                              alt={`${trendDirection} trend graph`}
-                              className="h-full w-full scale-[1.65] object-contain"
-                            />
+                          <div className="flex h-24 items-center justify-center overflow-hidden rounded-md border border-gray-200 bg-white p-2">
+                            <svg viewBox="0 0 120 64" className="h-full w-full" aria-hidden="true">
+                              <line x1="8" y1="56" x2="112" y2="56" stroke="#d1d5db" strokeWidth="2" />
+                              {chartMeta ? (
+                                <>
+                                  <rect x="20" y={Math.min(chartMeta.y1, 52)} width="14" height={56 - Math.min(chartMeta.y1, 52)} rx="2" fill="#9ca3af" />
+                                  <rect x="72" y={Math.min(chartMeta.y2, 52)} width="14" height={56 - Math.min(chartMeta.y2, 52)} rx="2" fill="#6b7280" />
+                                  <path d={`M27 ${chartMeta.y1} L79 ${chartMeta.y2}`} stroke="#374151" strokeWidth="2.5" fill="none" />
+                                </>
+                              ) : (
+                                <>
+                                  <rect x="20" y="30" width="14" height="26" rx="2" fill="#9ca3af" />
+                                  <rect x="72" y="24" width="14" height="32" rx="2" fill="#6b7280" />
+                                </>
+                              )}
+                            </svg>
                           </div>
 
                           <div className="space-y-1.5">
@@ -1109,7 +1075,7 @@ function Dashboard() {
                     type="button"
                     onClick={() => setActivePlanPage((p) => Math.max(p - 1, 1))}
                     disabled={activePlanPage === 1 || sortedActivePlans.length === 0}
-                    className="rounded border border-gray-300 bg-white px-3 py-1 text-xs text-gray-700 disabled:opacity-50"
+                    className="rounded-md border border-gray-300 bg-white px-3 py-1 text-xs text-gray-800 transition hover:bg-black hover:text-white disabled:opacity-50"
                   >
                     Prev
                   </button>
@@ -1130,7 +1096,7 @@ function Dashboard() {
                       activePlanPage === totalActivePlanPages ||
                       sortedActivePlans.length === 0
                     }
-                    className="rounded border border-gray-300 bg-white px-3 py-1 text-xs text-gray-700 disabled:opacity-50"
+                    className="rounded-md border border-gray-300 bg-white px-3 py-1 text-xs text-gray-800 transition hover:bg-black hover:text-white disabled:opacity-50"
                   >
                     Next
                   </button>
@@ -1140,17 +1106,17 @@ function Dashboard() {
           )}
         </div>
 
-        {message && <p className="text-red-400">{message}</p>}
+        {message && <p className="text-sm text-gray-600">{message}</p>}
       </div>
       </div>
 
       {selectedActivePlan ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
-          <div className="w-full max-w-lg rounded-xl border border-neutral-800 bg-neutral-900 p-6 shadow-2xl">
+          <div className="w-full max-w-lg rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h3 className="text-lg font-semibold text-white">Plan Insights</h3>
-                <p className="mt-1 text-sm text-neutral-400">
+                <h3 className="text-lg font-semibold text-gray-900">Plan Insights</h3>
+                <p className="mt-1 text-sm text-gray-600">
                   {typeof selectedActivePlan?.patient === "object"
                     ? selectedActivePlan.patient?.name
                     : "Patient"}
@@ -1160,68 +1126,68 @@ function Dashboard() {
               <button
                 type="button"
                 onClick={() => setSelectedActivePlan(null)}
-                className="text-sm text-neutral-400 hover:text-white"
+                className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-800 transition hover:bg-black hover:text-white"
               >
                 Close
               </button>
             </div>
 
             {!selectedActivePlan.analysis ? (
-              <div className="mt-5 rounded-lg border border-neutral-800 bg-neutral-800/60 p-4">
-                <p className="text-sm text-neutral-300">No analysis available</p>
+              <div className="mt-5 rounded-xl bg-gray-50 px-4 py-3">
+                <p className="text-sm text-gray-600">No analysis available</p>
               </div>
             ) : (
               <div className="mt-5 space-y-4">
                 {isImmediateAttention(selectedActivePlan) ? (
-                  <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm font-medium text-red-300">
+                  <div className="rounded-full bg-black px-4 py-2 text-sm font-medium text-white inline-flex">
                     Needs Immediate Attention
                   </div>
                 ) : null}
 
-                <div className="rounded-lg border border-neutral-800 bg-neutral-800/60 p-4">
-                  <p className="text-xs uppercase tracking-wide text-neutral-500">
+                <div className="rounded-xl bg-gray-50 px-4 py-3">
+                  <p className="text-xs uppercase tracking-wide text-gray-400">
                     Summary
                   </p>
-                  <p className="mt-2 text-sm leading-6 text-neutral-200">
+                  <p className="mt-2 text-sm leading-6 text-gray-600">
                     {selectedActivePlan.analysis.reasonSummary || "No insight summary available."}
                   </p>
                 </div>
 
                 <div className="grid gap-3 md:grid-cols-2">
-                  <div className="rounded-lg border border-neutral-800 bg-neutral-800/60 p-4">
-                    <p className="text-xs uppercase tracking-wide text-neutral-500">
+                  <div className="rounded-xl bg-gray-50 px-4 py-3">
+                    <p className="text-xs uppercase tracking-wide text-gray-400">
                       Metrics
                     </p>
-                    <p className="mt-2 text-sm leading-6 text-neutral-200">
+                    <p className="mt-2 text-sm leading-6 text-gray-600">
                       Effectiveness:{" "}
                       {typeof selectedActivePlan.analysis.effectiveness?.score === "number"
                         ? `${selectedActivePlan.analysis.effectiveness.score} (${selectedActivePlan.analysis.effectiveness.level || "unknown"})`
                         : "-"}
                     </p>
-                    <p className="mt-2 text-sm leading-6 text-neutral-200">
+                    <p className="mt-2 text-sm leading-6 text-gray-600">
                       Trend: {formatTrendLabel(getTrendValue(selectedActivePlan) || "stable")}
                     </p>
-                    <p className="mt-2 text-sm leading-6 text-neutral-200">
+                    <p className="mt-2 text-sm leading-6 text-gray-600">
                       Primary issue: {getPrimaryIssue(selectedActivePlan) || "none"}
                     </p>
                   </div>
 
-                  <div className="rounded-lg border border-neutral-800 bg-neutral-800/60 p-4">
-                    <p className="text-xs uppercase tracking-wide text-neutral-500">
+                  <div className="rounded-xl bg-gray-50 px-4 py-3">
+                    <p className="text-xs uppercase tracking-wide text-gray-400">
                       Recommendation
                     </p>
-                    <p className="mt-2 text-sm leading-6 text-neutral-200">
+                    <p className="mt-2 text-sm leading-6 text-gray-600">
                       {selectedActivePlan.analysis.reasonSummary ||
                         "Review the latest adaptive analysis before deciding on next steps."}
                     </p>
                   </div>
                 </div>
 
-                <div className="rounded-lg border border-neutral-800 bg-neutral-800/60 p-4">
-                  <p className="text-xs uppercase tracking-wide text-neutral-500">
+                <div className="rounded-xl bg-gray-50 px-4 py-3">
+                  <p className="text-xs uppercase tracking-wide text-gray-400">
                     Expected Impact
                   </p>
-                  <p className="mt-2 text-sm leading-6 text-neutral-200">
+                  <p className="mt-2 text-sm leading-6 text-gray-600">
                     {selectedActivePlan.analysis.expectedImpact || "No expected impact available."}
                   </p>
                 </div>

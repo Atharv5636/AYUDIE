@@ -65,7 +65,7 @@ function PlansAwaitingReview({
 
   if (plans.length === 0) {
     return (
-      <div className="flex h-full flex-col rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-6 shadow-sm">
+      <div className="flex h-full flex-col rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-all duration-200 hover:shadow-md">
         <h2 className="mb-2 text-lg font-semibold text-gray-900">Pending Plans</h2>
         <p className="text-sm text-gray-600">No plans pending review</p>
       </div>
@@ -74,7 +74,7 @@ function PlansAwaitingReview({
 
   return (
     <>
-      <div className="flex h-full flex-col rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-6 shadow-sm">
+      <div className="flex h-full flex-col rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-all duration-200 hover:shadow-md">
         <div className="mb-4">
           <h2 className="text-lg font-semibold text-gray-900">Pending Plans</h2>
           <p className="mt-1 text-sm text-gray-600">
@@ -97,20 +97,20 @@ function PlansAwaitingReview({
             return (
               <div
                 key={plan._id}
-                className="rounded-lg border-[2px] border-gray-300/60 bg-[#FFFDF8] p-5 shadow-sm"
+                className="rounded-xl border border-gray-200 bg-white p-5"
               >
                 <div>
-                  <p className="text-2xl font-medium text-gray-900">{patientName}</p>
+                  <p className="text-lg font-semibold text-gray-900">{patientName}</p>
                   <p className="mt-1 text-sm text-gray-600">
-                    {primaryIssue} • {formatTrendLabel?.(trend) || trend}
+                    {primaryIssue} - {formatTrendLabel?.(trend) || trend}
                   </p>
                   <p className="text-sm text-gray-600">Duration: {formatPlanDuration?.(plan)}</p>
-                  <p className="text-xs text-gray-500">{trendDelta}</p>
+                  <p className="text-xs uppercase tracking-wide text-gray-400">{trendDelta}</p>
                 </div>
 
                 <div className="mt-4 flex flex-wrap items-center gap-3">
                   {isImmediateAttention?.(plan) ? (
-                    <span className="rounded-full bg-red-100 px-2.5 py-1 text-[11px] font-medium text-red-600">
+                    <span className="rounded-full bg-black px-2.5 py-1 text-[11px] font-medium text-white">
                       Needs Immediate Attention
                     </span>
                   ) : null}
@@ -118,7 +118,7 @@ function PlansAwaitingReview({
                   <button
                     disabled={loadingId === plan._id}
                     onClick={() => handleApprove(plan)}
-                    className="rounded-lg bg-green-500 px-3 py-1.5 text-sm text-white transition hover:bg-green-600 disabled:opacity-50"
+                    className="rounded-md bg-yellow-400 px-4 py-2 text-sm font-semibold text-black transition hover:bg-yellow-500 disabled:opacity-50"
                   >
                     {loadingId === plan._id ? "Approving..." : "Approve"}
                   </button>
@@ -126,7 +126,7 @@ function PlansAwaitingReview({
                   <button
                     disabled={loadingId === plan._id}
                     onClick={() => handleReject(plan._id)}
-                    className="rounded-lg bg-red-500 px-3 py-1.5 text-sm text-white transition hover:bg-red-600 disabled:opacity-50"
+                    className="rounded-md bg-red-500 px-4 py-2 text-sm text-white transition hover:bg-red-600 disabled:opacity-50"
                   >
                     {loadingId === plan._id ? "Processing..." : "Reject"}
                   </button>
@@ -142,7 +142,7 @@ function PlansAwaitingReview({
               type="button"
               onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
               disabled={currentPage === 1 || !plans || plans.length === 0}
-              className="rounded border border-gray-300 bg-white px-3 py-1 text-xs text-gray-700 disabled:opacity-50"
+              className="rounded-md border border-gray-300 bg-white px-3 py-1 text-xs text-gray-800 transition hover:bg-black hover:text-white disabled:opacity-50"
             >
               Prev
             </button>
@@ -157,7 +157,7 @@ function PlansAwaitingReview({
               type="button"
               onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
               disabled={currentPage === totalPages || !plans || plans.length === 0}
-              className="rounded border border-gray-300 bg-white px-3 py-1 text-xs text-gray-700 disabled:opacity-50"
+              className="rounded-md border border-gray-300 bg-white px-3 py-1 text-xs text-gray-800 transition hover:bg-black hover:text-white disabled:opacity-50"
             >
               Next
             </button>
@@ -169,5 +169,7 @@ function PlansAwaitingReview({
 }
 
 export default PlansAwaitingReview;
+
+
 
 

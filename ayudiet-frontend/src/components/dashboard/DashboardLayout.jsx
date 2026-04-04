@@ -6,11 +6,8 @@ function DashboardLayout() {
   const [search, setSearch] = useState("");
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      {/* TOP NAV */}
+    <div className="min-h-screen bg-[#F5F5F4] text-gray-900">
       <Topbar search={search} setSearch={setSearch} />
-
-      {/* IMPORTANT PART 👇 */}
       <main className="p-6">
         <Outlet context={{ search }} />
       </main>

@@ -22,7 +22,7 @@ function Sidebar({ isOpen, onClose }) {
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-30 w-64 border-r border-gray-300 bg-white p-4 text-gray-900 shadow-sm transition-transform duration-300 ease-out ${
+        className={`fixed inset-y-0 left-0 z-30 w-64 border-r border-gray-200 bg-white p-4 text-gray-900 shadow-sm transition-transform duration-300 ease-out ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -42,7 +42,7 @@ function Sidebar({ isOpen, onClose }) {
               navigate("/dashboard");
               onClose();
             }}
-            className="flex w-full items-center gap-2 rounded p-2 hover:bg-gray-100"
+            className="flex w-full items-center gap-2 rounded-md p-2 text-gray-600 hover:bg-gray-100"
           >
             <LayoutDashboard size={18} />
             Dashboard
@@ -53,7 +53,7 @@ function Sidebar({ isOpen, onClose }) {
               navigate("/dashboard/patients");
               onClose();
             }}
-            className="flex w-full items-center gap-2 rounded p-2 hover:bg-gray-100"
+            className="flex w-full items-center gap-2 rounded-md p-2 text-gray-600 hover:bg-gray-100"
           >
             <Users size={18} />
             Patients
@@ -64,7 +64,7 @@ function Sidebar({ isOpen, onClose }) {
               navigate("/dashboard/patients-table");
               onClose();
             }}
-            className="flex w-full items-center gap-2 rounded p-2 hover:bg-gray-100"
+            className="flex w-full items-center gap-2 rounded-md p-2 text-gray-600 hover:bg-gray-100"
           >
             <Table2 size={18} />
             Patients Table
@@ -72,7 +72,7 @@ function Sidebar({ isOpen, onClose }) {
 
           <button
             onClick={logout}
-            className="mt-6 flex w-full items-center gap-2 rounded p-2 hover:bg-gray-100"
+            className="mt-6 flex w-full items-center gap-2 rounded-md p-2 text-gray-600 hover:bg-gray-100"
           >
             <LogOut size={18} />
             Logout

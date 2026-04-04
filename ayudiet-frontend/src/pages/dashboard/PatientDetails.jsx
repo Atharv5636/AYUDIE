@@ -586,13 +586,13 @@ function PatientDetails() {
   }
 
   if (!patient) {
-    return <p className="text-red-600">Patient not found</p>;
+    return <p className="text-gray-600">Patient not found</p>;
   }
 
   return (
     <div className="w-full space-y-8">
       {toast && (
-        <div className="fixed top-4 right-4 z-50 rounded-xl bg-green-600 px-4 py-2 text-white shadow-lg shadow-black/20">
+        <div className="fixed top-4 right-4 z-50 rounded-md bg-black px-4 py-2 text-white shadow-sm">
           {toast}
         </div>
       )}
@@ -602,7 +602,7 @@ function PatientDetails() {
       </Link>
 
       <div className="space-y-8">
-        <div className="rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-6 shadow-sm md:p-7">
+        <div className="rounded-2xl border border-gray-200 bg-white p-6  md:p-7">
           <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
             {patient?.name}
           </h1>
@@ -621,7 +621,7 @@ function PatientDetails() {
           />
         </Section>
 
-        <div className="mt-6 space-y-6 rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-6 md:p-7">
+        <div className="mt-6 space-y-6 rounded-2xl border border-gray-200 bg-white p-6 md:p-7">
           <div className="flex items-center justify-between gap-4">
             <h2 className="text-2xl font-semibold text-gray-900">Active Diet Plan</h2>
 
@@ -631,7 +631,7 @@ function PatientDetails() {
                   resetBuilder();
                   setShowForm(true);
                 }}
-                className="rounded-xl bg-green-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-green-500"
+                className="rounded-xl bg-yellow-400 px-4 py-2.5 text-sm font-semibold text-black transition hover:bg-yellow-500"
               >
                 Create Diet Plan
               </button>
@@ -640,7 +640,7 @@ function PatientDetails() {
 
           {activePlan ? (
             <div className="space-y-5">
-              <div className="rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-5">
+              <div className="rounded-2xl border border-gray-200 bg-white p-5">
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="text-lg font-semibold text-gray-900">
@@ -654,7 +654,7 @@ function PatientDetails() {
                   <button
                     type="button"
                     onClick={() => startEditingPlan(activePlan)}
-                    className="text-sm font-medium text-blue-600 transition hover:text-blue-700"
+                    className="text-sm font-medium text-gray-800 transition hover:text-black"
                   >
                     Edit Plan
                   </button>
@@ -671,13 +671,13 @@ function PatientDetails() {
           )}
 
           {showForm && (
-            <div className="mt-4 space-y-6 rounded-2xl border-[2px] border-gray-300/60 bg-white p-6 md:p-7">
+            <div className="mt-4 space-y-6 rounded-2xl border border-gray-200 bg-white p-6 md:p-7">
               <div className="flex items-center justify-between gap-4">
                 <h3 className="text-2xl font-semibold text-gray-900">
                   {editingPlanId ? "Editing Mode" : "Create Plan"}
                 </h3>
                 {editingPlanId && (
-                  <span className="rounded-full border border-green-200 bg-green-50 px-3 py-1 text-sm text-green-700">
+                  <span className="rounded-full bg-gray-100 px-3 py-1 text-sm text-gray-700">
                     Updating existing plan
                   </span>
                 )}
@@ -689,13 +689,13 @@ function PatientDetails() {
                   placeholder="Plan Title"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-500 focus:border-green-500/50 focus:outline-none"
+                  className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-500 focus:border-gray-400 focus:outline-none"
                 />
 
                   <select
                   value={goal}
                   onChange={(e) => setGoal(e.target.value)}
-                  className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 focus:border-green-500/50 focus:outline-none"
+                  className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 focus:border-gray-400 focus:outline-none"
                 >
                   <option value="">Select Goal</option>
                   <option value="weight loss">Weight Loss</option>
@@ -707,7 +707,7 @@ function PatientDetails() {
                 <select
                   value={dosha}
                   onChange={(e) => setDosha(e.target.value)}
-                  className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 focus:border-green-500/50 focus:outline-none"
+                  className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 focus:border-gray-400 focus:outline-none"
                 >
                   <option value="">Select Dosha</option>
                   <option value="vata">Vata</option>
@@ -719,7 +719,7 @@ function PatientDetails() {
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 focus:border-green-500/50 focus:outline-none"
+                  className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 focus:border-gray-400 focus:outline-none"
                 />
               </div>
 
@@ -734,7 +734,7 @@ function PatientDetails() {
                         type="button"
                         onClick={handleGenerateWithAi}
                         disabled={isGeneratingAi}
-                        className="rounded-xl border border-blue-300 px-4 py-2.5 text-sm font-medium text-blue-700 transition hover:bg-blue-50 disabled:opacity-60"
+                        className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-800 transition hover:bg-black hover:text-white disabled:opacity-60"
                       >
                         {isGeneratingAi
                           ? "Generating diet plan..."
@@ -744,7 +744,7 @@ function PatientDetails() {
                         type="button"
                         onClick={handleAutoImprovePlan}
                         disabled={isImprovingPlan}
-                        className="rounded-xl border border-amber-300 px-4 py-2.5 text-sm font-medium text-amber-700 transition hover:bg-amber-50 disabled:opacity-60"
+                        className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-800 transition hover:bg-black hover:text-white disabled:opacity-60"
                       >
                         {isImprovingPlan
                           ? "Improving plan..."
@@ -753,7 +753,7 @@ function PatientDetails() {
                       <button
                         type="button"
                         onClick={addDay}
-                        className="rounded-xl border border-green-300 px-4 py-2.5 text-sm font-medium text-green-700 transition hover:bg-green-50"
+                        className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-800 transition hover:bg-black hover:text-white"
                       >
                         Add Day
                       </button>
@@ -764,7 +764,7 @@ function PatientDetails() {
                     {days.map((day, index) => (
                       <div
                         key={`${day.day}-${index}`}
-                        className="rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-5 shadow-sm md:p-6"
+                        className="rounded-2xl border border-gray-200 bg-white p-5  md:p-6"
                       >
                         <div className="mb-5 flex items-center justify-between gap-4 border-b border-gray-200 pb-4">
                           <div className="space-y-1">
@@ -785,7 +785,7 @@ function PatientDetails() {
                             <button
                               type="button"
                               onClick={() => removeDay(index)}
-                              className="text-sm font-medium text-red-600 transition hover:text-red-700"
+                              className="text-sm font-medium text-gray-600 transition hover:text-gray-600"
                             >
                               Remove
                             </button>
@@ -830,13 +830,13 @@ function PatientDetails() {
                     <ChangesMadeCard changes={autoFixChanges} />
                   )}
 
-                  <div className="space-y-3 rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-5">
+                  <div className="space-y-3 rounded-2xl border border-gray-200 bg-white p-5">
                     <p className="text-sm uppercase tracking-[0.2em] text-gray-500">
                       Actions
                     </p>
                     <button
                       onClick={handleSubmitPlan}
-                      className="w-full rounded-xl bg-green-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-green-500"
+                      className="w-full rounded-xl bg-yellow-400 px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-yellow-500"
                     >
                       {editingPlanId ? "Save Changes" : "Save Plan"}
                     </button>
@@ -851,14 +851,14 @@ function PatientDetails() {
                 </div>
 
                 {lastGeneratedContext && (
-                  <div className="space-y-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3">
-                    <p className="text-sm text-blue-800">
+                  <div className="space-y-2 rounded-xl bg-gray-50 px-4 py-3">
+                    <p className="text-sm text-gray-600">
                       Generated for: {lastGeneratedContext.goal} |{" "}
                       {lastGeneratedContext.doshaType} |{" "}
                       {lastGeneratedContext.weight} kg
                     </p>
                     {lastProgressInsights.length > 0 && (
-                      <p className="text-xs text-blue-700">
+                      <p className="text-xs text-gray-600">
                         Plan adjusted based on recent progress:{" "}
                         {lastProgressInsights.join(" | ")}
                       </p>
@@ -870,7 +870,7 @@ function PatientDetails() {
           )}
         </div>
 
-        <div className="mt-8 rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-6 md:p-7">
+        <div className="mt-8 rounded-2xl border border-gray-200 bg-white p-6 md:p-7">
           <h2 className="mb-4 text-2xl font-semibold text-gray-900">Plan History</h2>
 
           {historicalPlans.length === 0 ? (
@@ -883,7 +883,7 @@ function PatientDetails() {
                   return (
                     <div
                       key={plan._id}
-                      className="space-y-4 rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-5 shadow-sm"
+                      className="space-y-4 rounded-2xl border border-gray-200 bg-white p-5 "
                     >
                       <button
                         type="button"
@@ -908,11 +908,11 @@ function PatientDetails() {
                               event.stopPropagation();
                               startEditingPlan(plan);
                             }}
-                            className="text-sm font-medium text-blue-600 transition hover:text-blue-700"
+                            className="text-sm font-medium text-gray-800 transition hover:text-black"
                           >
                             Edit Plan
                           </button>
-                          <span className="text-sm text-green-700">
+                          <span className="text-sm text-gray-700">
                             {isExpanded ? "Hide meals" : "View meals"}
                           </span>
                         </div>
@@ -982,7 +982,7 @@ function PatientDetails() {
           <Info label="Preferences" value={patient?.preferences || "-"} />
         </Section>
 
-        <div className="space-y-6 rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-6 md:p-7">
+        <div className="space-y-6 rounded-2xl border border-gray-200 bg-white p-6 md:p-7">
           <div className="space-y-1">
             <h2 className="text-2xl font-semibold text-gray-900">
               Progress Tracking
@@ -992,7 +992,7 @@ function PatientDetails() {
             </p>
           </div>
 
-          <div className="space-y-4 rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-5">
+          <div className="space-y-4 rounded-2xl border border-gray-200 bg-white p-5">
             <div className="flex items-center gap-2">
               <p className="text-lg font-semibold text-gray-900">Trend Summary</p>
             </div>
@@ -1018,7 +1018,7 @@ function PatientDetails() {
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <form
               onSubmit={handleSubmitProgress}
-              className="space-y-4 rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-5"
+              className="space-y-4 rounded-2xl border border-gray-200 bg-white p-5"
             >
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <label className="space-y-2">
@@ -1030,7 +1030,7 @@ function PatientDetails() {
                     onChange={(event) =>
                       handleProgressFieldChange("weight", event.target.value)
                     }
-                    className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 focus:border-green-500/50 focus:outline-none"
+                    className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 focus:border-gray-400 focus:outline-none"
                   />
                 </label>
 
@@ -1041,7 +1041,7 @@ function PatientDetails() {
                     onChange={(event) =>
                       handleProgressFieldChange("energyLevel", event.target.value)
                     }
-                    className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 focus:border-green-500/50 focus:outline-none"
+                    className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 focus:border-gray-400 focus:outline-none"
                   >
                     {[1, 2, 3, 4, 5].map((level) => (
                       <option key={level} value={level}>
@@ -1060,7 +1060,7 @@ function PatientDetails() {
                     onChange={(event) =>
                       handleProgressFieldChange("digestion", event.target.value)
                     }
-                    className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 focus:border-green-500/50 focus:outline-none"
+                    className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 focus:border-gray-400 focus:outline-none"
                   >
                     <option value="good">Good</option>
                     <option value="bad">Bad</option>
@@ -1090,7 +1090,7 @@ function PatientDetails() {
                     handleProgressFieldChange("notes", event.target.value)
                   }
                   rows={4}
-                  className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 focus:border-green-500/50 focus:outline-none"
+                  className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 focus:border-gray-400 focus:outline-none"
                   placeholder="Optional observations"
                 />
               </label>
@@ -1098,13 +1098,13 @@ function PatientDetails() {
               <button
                 type="button"
                 onClick={handleSaveProgress}
-                className="rounded-xl bg-green-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-green-500"
+                className="rounded-xl bg-yellow-400 px-5 py-2.5 text-sm font-semibold text-black transition hover:bg-yellow-500"
               >
                 Save Progress
               </button>
             </form>
 
-            <div className="space-y-4 rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-5">
+            <div className="space-y-4 rounded-2xl border border-gray-200 bg-white p-5">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-900">
                   Recent Progress Logs
@@ -1125,7 +1125,7 @@ function PatientDetails() {
                   {paginatedProgressLogs.map((log) => (
                     <div
                       key={log._id}
-                      className="rounded-xl border-[2px] border-gray-300/60 bg-white p-4"
+                      className="rounded-xl border border-gray-200 bg-white p-4"
                     >
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <p className="text-sm font-medium text-gray-900">
@@ -1212,7 +1212,7 @@ function MealsList({ meals = [] }) {
       {meals.map((mealDay, index) => (
         <div
           key={`${mealDay.day}-${index}`}
-          className="rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-5 md:p-6"
+          className="rounded-2xl border border-gray-200 bg-white p-5 md:p-6"
         >
           <h3 className="mb-4 text-lg font-semibold text-gray-900">{mealDay.day}</h3>
           <div className="grid gap-3 md:grid-cols-3">
@@ -1236,15 +1236,10 @@ function PlanValidationCard({ validation }) {
   }
 
   const { score, issues, suggestions } = validation;
-  const badgeClasses =
-    score < 5
-      ? "bg-red-100 text-red-700"
-      : score < 8
-        ? "bg-yellow-100 text-yellow-700"
-        : "bg-green-100 text-green-700";
+  const badgeClasses = score < 5 ? "bg-black text-white" : "bg-gray-100 text-gray-700";
 
   return (
-    <div className="space-y-5 rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-5 md:p-6">
+    <div className="space-y-5 rounded-2xl border border-gray-200 bg-white p-5 md:p-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-sm uppercase tracking-[0.2em] text-gray-500">
@@ -1258,13 +1253,13 @@ function PlanValidationCard({ validation }) {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <div className="space-y-2 rounded-xl border border-red-200 bg-red-50 p-4">
-          <p className="text-sm font-medium text-red-700">Warning Issues</p>
-          <p className="text-xs text-red-600">Review these items first</p>
+        <div className="space-y-2 rounded-xl bg-gray-50 p-4">
+          <p className="text-sm font-medium text-gray-600">Warning Issues</p>
+          <p className="text-xs text-gray-600">Review these items first</p>
           {issues.length ? (
             <div className="space-y-2">
               {issues.map((issue) => (
-                <p key={issue} className="text-sm text-red-700">
+                <p key={issue} className="text-sm text-gray-600">
                   Warning {issue}
                 </p>
               ))}
@@ -1274,15 +1269,15 @@ function PlanValidationCard({ validation }) {
           )}
         </div>
 
-        <div className="space-y-2 rounded-xl border border-green-200 bg-green-50 p-4">
-          <p className="text-sm font-medium text-green-700">Helpful Suggestions</p>
-          <p className="text-xs text-green-600">
+        <div className="space-y-2 rounded-xl bg-gray-50 p-4">
+          <p className="text-sm font-medium text-gray-700">Helpful Suggestions</p>
+          <p className="text-xs text-gray-600">
             Simple ways to improve balance
           </p>
           {suggestions.length ? (
             <div className="space-y-2">
               {suggestions.map((suggestion) => (
-                <p key={suggestion} className="text-sm text-green-700">
+                <p key={suggestion} className="text-sm text-gray-700">
                   Check {suggestion}
                 </p>
               ))}
@@ -1298,7 +1293,7 @@ function PlanValidationCard({ validation }) {
 
 function ChangesMadeCard({ changes }) {
   return (
-    <div className="space-y-3 rounded-2xl border border-amber-200 bg-amber-50 p-5">
+    <div className="space-y-3 rounded-2xl border border-gray-200 bg-white p-5">
       <p className="text-base font-semibold text-gray-900">Changes made:</p>
       <div className="space-y-2">
         {changes.map((change) => (
@@ -1313,7 +1308,7 @@ function ChangesMadeCard({ changes }) {
 
 function MealEditor({ icon, label, value, onChange }) {
   return (
-    <div className="space-y-3 rounded-xl border-[2px] border-gray-300/60 bg-white p-4">
+    <div className="space-y-3 rounded-xl border border-gray-200 bg-white p-4">
       <div className="flex items-center gap-3">
         <div className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
           {icon}
@@ -1328,7 +1323,7 @@ function MealEditor({ icon, label, value, onChange }) {
         placeholder={label}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="min-h-28 w-full resize-none rounded-xl border border-gray-300 bg-white p-3 text-sm text-gray-900 placeholder:text-gray-500 focus:border-green-500/50 focus:outline-none"
+        className="min-h-28 w-full resize-none rounded-xl border border-gray-300 bg-white p-3 text-sm text-gray-900 placeholder:text-gray-500 focus:border-gray-400 focus:outline-none"
       />
     </div>
   );
@@ -1336,7 +1331,7 @@ function MealEditor({ icon, label, value, onChange }) {
 
 function MealDisplay({ icon, label, value }) {
   return (
-    <div className="space-y-2 rounded-xl border-[2px] border-gray-300/60 bg-white p-4">
+    <div className="space-y-2 rounded-xl border border-gray-200 bg-white p-4">
       <div className="flex items-center gap-3">
         <div className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
           {icon}
@@ -1350,7 +1345,7 @@ function MealDisplay({ icon, label, value }) {
 
 function TrendCard({ label, arrow, value }) {
   return (
-    <div className="rounded-xl border-[2px] border-gray-300/60 bg-white p-4">
+    <div className="rounded-xl border border-gray-200 bg-white p-4">
       <p className="text-xs uppercase tracking-[0.18em] text-gray-500">{label}</p>
       <div className="mt-3 flex items-center gap-3">
         <span className="text-2xl font-semibold text-gray-900">{arrow}</span>
@@ -1362,8 +1357,8 @@ function TrendCard({ label, arrow, value }) {
 
 function Section({ title, children }) {
   return (
-    <div className="space-y-4 rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-6 shadow-sm md:p-7">
-      <h2 className="border-l-4 border-green-500 pl-3 text-xl font-semibold text-gray-900">
+    <div className="space-y-4 rounded-2xl border border-gray-200 bg-white p-6  md:p-7">
+      <h2 className=" text-xl font-semibold text-gray-900">
         {title}
       </h2>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">{children}</div>
@@ -1373,11 +1368,13 @@ function Section({ title, children }) {
 
 function Info({ label, value }) {
   return (
-    <div className="rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-5 shadow-sm">
+    <div className="rounded-2xl border border-gray-200 bg-white p-5 ">
       <p className="text-xs uppercase tracking-[0.18em] text-gray-500">{label}</p>
       <p className="mt-2 text-base text-gray-900">{value}</p>
     </div>
   );
 }
+
+
 
 

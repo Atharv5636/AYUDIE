@@ -90,37 +90,37 @@ function PatientsTablePage() {
 
   const getTrendTone = (trend) => {
     if (trend === "declining" || trend === "slight_decline") {
-      return "text-red-300";
+      return "text-gray-700";
     }
 
     if (trend === "improving" || trend === "slight_improvement") {
-      return "text-green-300";
+      return "text-gray-700";
     }
 
-    return "text-neutral-300";
+    return "text-gray-700";
   };
 
   const getTrendMeta = (trend) => {
     if (trend === "declining" || trend === "slight_decline") {
       return {
         icon: ArrowDownRight,
-        className: "text-red-300",
-        chipClassName: "bg-red-500/10 text-red-300",
+        className: "text-gray-700",
+        chipClassName: "bg-black text-white",
       };
     }
 
     if (trend === "improving" || trend === "slight_improvement") {
       return {
         icon: ArrowUpRight,
-        className: "text-green-300",
-        chipClassName: "bg-green-500/10 text-green-300",
+        className: "text-gray-700",
+        chipClassName: "bg-gray-100 text-gray-700",
       };
     }
 
     return {
       icon: Minus,
-      className: "text-neutral-300",
-      chipClassName: "bg-neutral-700 text-neutral-200",
+      className: "text-gray-700",
+      chipClassName: "bg-gray-100 text-gray-700",
     };
   };
 
@@ -205,7 +205,7 @@ function PatientsTablePage() {
 
           <button
             onClick={() => setShowMockData((prev) => !prev)}
-            className="rounded border border-gray-300 bg-white px-2 py-1 text-xs text-gray-700 hover:bg-gray-100"
+            className="rounded-md border border-gray-300 bg-white px-3 py-1 text-xs text-gray-800 transition hover:bg-black hover:text-white"
           >
             {showMockData ? "Hide Mock Data" : "Show Mock Data"}
           </button>
@@ -220,7 +220,7 @@ function PatientsTablePage() {
         />
 
         {message && (
-          <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          <div className="flex items-start gap-2 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">
             <TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" />
             <p>{message}</p>
           </div>

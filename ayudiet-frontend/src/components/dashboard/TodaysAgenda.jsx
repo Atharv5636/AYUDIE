@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import agendaFrame from "../../assets/agenda-botanical-frame.png";
 
 const initialForm = {
   patientId: "",
@@ -93,21 +92,13 @@ function TodaysAgenda({
   }
 
   return (
-    <div
-      className="flex h-full flex-col overflow-hidden rounded-2xl border-[2px] border-black p-6 shadow-sm"
-      style={{
-        backgroundImage: `url(${agendaFrame})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-      }}
-    >
+    <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-all duration-200 hover:shadow-md">
       <div className="mb-4 flex items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
           <h2 className="inline-block rounded-md bg-yellow-300 px-3 py-1 text-lg font-semibold text-gray-900">
             Today's Agenda
           </h2>
-          <p className="mt-2 inline-block rounded bg-white/90 px-2 py-0.5 text-sm text-gray-800">
+          <p className="mt-2 text-sm text-gray-600">
             Focus on the next visit and track what is already done.
           </p>
         </div>
@@ -115,7 +106,7 @@ function TodaysAgenda({
         <button
           type="button"
           onClick={() => setShowForm((current) => !current)}
-          className="shrink-0 whitespace-nowrap rounded bg-white/90 px-3 py-1.5 text-sm font-medium text-gray-800 transition hover:bg-white hover:text-gray-900"
+          className="shrink-0 whitespace-nowrap rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-800 transition hover:bg-black hover:text-white"
         >
           {showForm ? "Close" : "+ Add New"}
         </button>
@@ -124,16 +115,16 @@ function TodaysAgenda({
       {showForm && (
         <form
           onSubmit={handleSubmit}
-          className="mb-4 space-y-4 rounded-lg border-[2px] border-gray-200 bg-gray-50 p-4"
+          className="mb-4 space-y-4 rounded-xl bg-gray-50 px-4 py-3"
         >
           <div className="grid gap-4 md:grid-cols-2">
             <label className="block">
-              <span className="mb-2 block text-sm text-gray-400">Patient</span>
+              <span className="mb-2 block text-xs uppercase tracking-wide text-gray-400">Patient</span>
               <select
                 name="patientId"
                 value={form.patientId}
                 onChange={handleChange}
-                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-600 outline-none"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-600 outline-none"
               >
                 <option value="">Select patient</option>
                 {patients.map((patient) => (
@@ -145,36 +136,36 @@ function TodaysAgenda({
             </label>
 
             <label className="block">
-              <span className="mb-2 block text-sm text-gray-400">Time</span>
+              <span className="mb-2 block text-xs uppercase tracking-wide text-gray-400">Time</span>
               <input
                 name="time"
                 type="time"
                 value={form.time}
                 onChange={handleChange}
-                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-600 outline-none"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-600 outline-none"
               />
             </label>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <label className="block">
-              <span className="mb-2 block text-sm text-gray-400">Type</span>
+              <span className="mb-2 block text-xs uppercase tracking-wide text-gray-400">Type</span>
               <input
                 name="type"
                 value={form.type}
                 onChange={handleChange}
                 placeholder="Consultation"
-                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-600 outline-none"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-600 outline-none"
               />
             </label>
 
             <label className="block">
-              <span className="mb-2 block text-sm text-gray-400">Status</span>
+              <span className="mb-2 block text-xs uppercase tracking-wide text-gray-400">Status</span>
               <select
                 name="status"
                 value={form.status}
                 onChange={handleChange}
-                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-600 outline-none"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-600 outline-none"
               >
                 <option value="upcoming">Upcoming</option>
                 <option value="completed">Completed</option>
@@ -187,7 +178,7 @@ function TodaysAgenda({
           <div className="flex gap-3">
             <button
               type="submit"
-              className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-800 transition hover:bg-gray-200"
+              className="rounded-md bg-yellow-400 px-4 py-2 text-sm font-semibold text-black transition hover:bg-yellow-500"
             >
               Add Agenda Item
             </button>
@@ -199,7 +190,7 @@ function TodaysAgenda({
                 setError("");
                 setShowForm(false);
               }}
-              className="rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-600 transition hover:bg-gray-100"
+              className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-800 transition hover:bg-black hover:text-white"
             >
               Cancel
             </button>
@@ -209,7 +200,7 @@ function TodaysAgenda({
 
       <div className="flex-1 space-y-4">
         {agenda.length === 0 ? (
-          <div className="rounded-lg border-[2px] border-dashed border-gray-300 px-4 py-6 text-sm text-gray-600">
+          <div className="rounded-xl border border-dashed border-gray-300 bg-gray-50 px-4 py-6 text-sm text-gray-600">
             No agenda items yet. Add one to schedule the next patient interaction.
           </div>
         ) : null}
@@ -217,14 +208,14 @@ function TodaysAgenda({
         {paginatedAgenda.map((item) => (
           <div
             key={item.id}
-            className="rounded-lg border-[2px] border-gray-200 bg-[#FFFDF8] p-4 shadow-sm"
+            className="rounded-xl border border-gray-200 bg-white p-4"
           >
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <p className="font-medium text-gray-900">{item.name}</p>
                   {item.id === nextAgendaId && (
-                    <span className="rounded-full bg-gray-200 px-2 py-0.5 text-[11px] font-medium text-gray-700">
+                    <span className="rounded-full bg-black px-2 py-0.5 text-[11px] font-medium text-white">
                       Next
                     </span>
                   )}
@@ -232,7 +223,7 @@ function TodaysAgenda({
                 <p className="mt-1 text-sm text-gray-600">{item.type}</p>
               </div>
 
-              <span className="rounded-full bg-gray-200 px-2.5 py-1 text-[11px] font-medium text-gray-700">
+              <span className="rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-medium text-gray-700">
                 {item.status === "completed" ? "Completed" : "Upcoming"}
               </span>
             </div>
@@ -253,14 +244,14 @@ function TodaysAgenda({
                     console.log("Editing agenda patient:", item);
                     navigate(`/dashboard/patients/${item.patientId}/edit`);
                   }}
-                  className="text-gray-600 hover:text-gray-900 disabled:cursor-not-allowed disabled:text-gray-400"
+                  className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-800 transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   Edit
                 </button>
 
                 <button
                   onClick={() => onDelete(item.id)}
-                  className="text-red-500 hover:text-red-600"
+                  className="rounded-md bg-red-500 px-4 py-2 text-sm text-white transition hover:bg-red-600"
                 >
                   Delete
                 </button>
@@ -271,13 +262,13 @@ function TodaysAgenda({
       </div>
 
       {agenda.length > 0 && (
-        <div className="mt-4 rounded-lg border border-gray-300/70 bg-white/90 px-3 pt-3 shadow-sm backdrop-blur-[1px]">
+        <div className="mt-4 border-t border-gray-200 px-3 pt-3">
           <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3 pb-3">
             <button
               type="button"
               onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
               disabled={currentPage === 1}
-              className="h-8 min-w-[72px] rounded border border-gray-400 bg-white px-2 text-sm font-semibold text-gray-800 shadow-sm disabled:cursor-not-allowed disabled:border-gray-300 disabled:bg-gray-100 disabled:text-gray-500"
+              className="h-8 min-w-[72px] rounded-md border border-gray-300 bg-white px-2 text-sm text-gray-800 transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
             >
               Prev
             </button>
@@ -290,7 +281,7 @@ function TodaysAgenda({
               type="button"
               onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
               disabled={currentPage === totalPages}
-              className="h-8 min-w-[72px] rounded border border-gray-400 bg-white px-2 text-sm font-semibold text-gray-800 shadow-sm disabled:cursor-not-allowed disabled:border-gray-300 disabled:bg-gray-100 disabled:text-gray-500"
+              className="h-8 min-w-[72px] rounded-md border border-gray-300 bg-white px-2 text-sm text-gray-800 transition hover:bg-black hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
             >
               Next
             </button>

@@ -35,14 +35,14 @@ function PatientsSection() {
       <div className="flex gap-3">
         <button
           onClick={fetchPatients}
-          className="px-4 py-2 bg-black text-white rounded-md"
+          className="rounded-md bg-yellow-400 px-4 py-2 font-semibold text-black transition hover:bg-yellow-500"
         >
           Fetch Patients
         </button>
 
         <button
           onClick={handleLogout}
-          className="px-4 py-2 border rounded-md"
+          className="rounded-md border border-gray-300 bg-white px-4 py-2 text-gray-800 transition hover:bg-black hover:text-white"
         >
           Logout
         </button>
@@ -50,12 +50,12 @@ function PatientsSection() {
     </div>
 
     {message && (
-      <p className="text-sm text-muted-foreground">{message}</p>
+      <p className="text-sm text-gray-600">{message}</p>
     )}
 
     {/* Patients Grid */}
     {patients.length === 0 ? (
-      <div className="text-muted-foreground">
+      <div className="text-gray-600">
         No patients found
       </div>
     ) : (
@@ -63,10 +63,10 @@ function PatientsSection() {
         {patients.map((p) => (
           <div
             key={p._id}
-            className="rounded-lg border bg-background p-4 shadow-sm"
+            className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition-all duration-200 hover:shadow-md"
           >
             <h3 className="font-semibold">{p.name}</h3>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-gray-600">
               Age: {p.age}
             </p>
           </div>
