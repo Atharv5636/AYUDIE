@@ -48,7 +48,7 @@ function PlansAwaitingReview({
 
   if (plans.length === 0) {
     return (
-      <div className="rounded-2xl border border-gray-300/60 bg-[#F7F7F5] p-6 shadow-sm">
+      <div className="rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-6 shadow-sm">
         <h2 className="mb-2 text-lg font-semibold text-gray-900">Pending Plans</h2>
         <p className="text-sm text-gray-600">No plans pending review</p>
       </div>
@@ -57,7 +57,7 @@ function PlansAwaitingReview({
 
   return (
     <>
-      <div className="rounded-2xl border border-gray-300/60 bg-[#F7F7F5] p-6 shadow-sm">
+      <div className="rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-6 shadow-sm">
         <div className="mb-4">
           <h2 className="text-lg font-semibold text-gray-900">Pending Plans</h2>
           <p className="mt-1 text-sm text-gray-600">
@@ -80,7 +80,7 @@ function PlansAwaitingReview({
             return (
               <div
                 key={plan._id}
-                className="rounded-lg border border-gray-200 bg-gray-50 p-4"
+                className="rounded-lg border-[2px] border-gray-200 bg-[#FFFDF8] p-4"
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
@@ -145,3 +145,4 @@ function PlansAwaitingReview({
 }
 
 export default PlansAwaitingReview;
+

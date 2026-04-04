@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+﻿const mongoose = require("mongoose");
 const Plan = require("../models/plan.model");
 const Patient = require("../models/patient.model");
 const ProgressLog = require("../models/progressLog.model");
@@ -553,7 +553,7 @@ const getPendingPlans = async (req, res, next) => {
       doctor: req.user.id,
       status: "pending",
     })
-      .populate("patient", "name age gender")
+      .populate("patient", "name age gender phone")
       .sort({ reviewDueDate: 1 });
 
     const plansWithAnalysis = (await attachAnalysisToPlans(plans)).map(
@@ -748,7 +748,7 @@ const approvePlan = async (req, res, next) => {
     plan.isActive = true;
 
     await plan.save();
-    await plan.populate("patient", "name age gender");
+    await plan.populate("patient", "name age gender phone");
     const planWithAnalysis = ensureAnalysisInResponse(
       await attachAnalysisToPlan(plan, {
         forceCompute: true,
@@ -795,7 +795,7 @@ const createPlan = async (req, res, next) => {
       ...validatedPayload,
     });
 
-    await plan.populate("patient", "name age gender");
+    await plan.populate("patient", "name age gender phone");
     const planWithAnalysis = ensureAnalysisInResponse(
       await attachAnalysisToPlan(plan, {
         forceCompute: true,
@@ -842,7 +842,7 @@ const updatePlan = async (req, res, next) => {
     plan.meals = validatedPayload.meals;
 
     await plan.save();
-    await plan.populate("patient", "name age gender");
+    await plan.populate("patient", "name age gender phone");
     const planWithAnalysis = ensureAnalysisInResponse(
       await attachAnalysisToPlan(plan, {
         forceCompute: true,
@@ -909,7 +909,7 @@ const applyPlanAdjustments = async (req, res, next) => {
     const plan = await Plan.findOne({
       _id: req.params.id,
       doctor: req.user.id,
-    }).populate("patient", "name age gender");
+    }).populate("patient", "name age gender phone");
 
     if (!plan) {
       return next(new ApiError(404, "Plan not found"));
@@ -953,7 +953,7 @@ const getPlansByPatient = async (req, res, next) => {
       patient: patientId,
       doctor: req.user.id,
     })
-      .populate("patient", "name age gender")
+      .populate("patient", "name age gender phone")
       .sort({ isActive: -1, createdAt: -1 });
 
     const plansWithAnalysis = (await attachAnalysisToPlans(plans)).map(
@@ -1013,3 +1013,4 @@ module.exports = {
   getPlansByPatient,
   getAdaptivePlanModifications,
 };
+

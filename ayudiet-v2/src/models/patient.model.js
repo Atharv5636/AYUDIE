@@ -60,6 +60,16 @@ const patientSchema = new mongoose.Schema(
       type: [String],
     },
 
+    phone: {
+      type: String,
+      trim: true,
+    },
+
+    isMock: {
+      type: Boolean,
+      default: false,
+    },
+
     progressLogs: [
       {
         weight: {

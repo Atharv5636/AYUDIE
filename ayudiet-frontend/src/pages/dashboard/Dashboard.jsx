@@ -1,6 +1,7 @@
 ﻿import { useEffect, useMemo, useState } from "react";
 import { useOutletContext } from "react-router-dom";
-import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
+import { AlertTriangle, ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
+import agendaFrame from "../../assets/agenda-botanical-frame.png";
 
 import PatientsTable from "../../components/dashboard/PatientsTable";
 import PlansAwaitingReview from "../../components/dashboard/PlansAwaitingReview";
@@ -172,9 +173,9 @@ function Dashboard() {
   function extractStartEndFromReason(reason) {
     if (!reason || typeof reason !== "string") return null;
 
-    // Supports patterns like: "55% -> 42%" or "2 → 1"
+    // Supports patterns like: "55% -> 42%" or "2 ? 1"
     const match = reason.match(
-      /from\s*(-?\d+(?:\.\d+)?)\s*(%|kg)?\s*(?:->|→)\s*(-?\d+(?:\.\d+)?)\s*(%|kg)?/i
+      /from\s*(-?\d+(?:\.\d+)?)\s*(%|kg)?\s*(?:->|\u2192)\s*(-?\d+(?:\.\d+)?)\s*(%|kg)?/i
     );
 
     if (!match) return null;
@@ -594,7 +595,7 @@ function Dashboard() {
         </div>
       )}
 
-      <div className="min-h-screen bg-gray-50 text-gray-900">
+      <div className="min-h-screen text-gray-900">
         <div className="max-w-6xl mx-auto px-6 py-6 space-y-6">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">
@@ -616,6 +617,7 @@ function Dashboard() {
             {[
               {
                 title: "Patients Needing Attention",
+                key: "needs-attention",
                 value: patientsNeedingAttention,
                 note:
                   patientsNeedingAttention > 0
@@ -624,27 +626,42 @@ function Dashboard() {
               },
               {
                 title: "Declining Plans",
+                key: "declining-plans",
                 value: decliningPlans,
                 note: "Plans showing downward momentum",
               },
               {
                 title: "Low Adherence Cases",
+                key: "low-adherence",
                 value: lowAdherenceCases,
                 note: "Primary issue is adherence",
               },
             ].map((card) => (
               <div
-                key={card.title}
-                className="rounded-2xl border border-gray-300/60 bg-[#F7F7F5] p-5 shadow-sm"
+                key={card.key}
+                className="relative overflow-hidden rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-5 shadow-sm"
               >
-                <p className="text-sm text-gray-600">{card.title}</p>
+                {card.key === "needs-attention" ? (
+                  <div className="pointer-events-none absolute bottom-5 left-1/2 -translate-x-1/2">
+                    <AlertTriangle className="h-24 w-24 text-red-700/45 fill-red-700/15 drop-shadow-sm" />
+                  </div>
+                ) : card.key === "declining-plans" ? (
+                  <div className="pointer-events-none absolute bottom-5 left-1/2 -translate-x-1/2">
+                    <ArrowDownRight className="h-24 w-24 text-amber-700/45 stroke-[1.5] drop-shadow-sm" />
+                  </div>
+                ) : card.key === "low-adherence" ? (
+                  <div className="pointer-events-none absolute bottom-5 left-1/2 -translate-x-1/2">
+                    <Minus className="h-24 w-24 text-orange-700/45 stroke-[1.5] drop-shadow-sm" />
+                  </div>
+                ) : null}
+                <p className="text-sm font-medium text-gray-800">{card.title}</p>
                 <p className="mt-2 text-3xl font-semibold text-gray-900">{card.value}</p>
                 <p className="mt-1 text-sm text-gray-700">{card.note}</p>
               </div>
             ))}
           </div>
 
-          <div className="rounded-2xl border border-gray-300/60 bg-[#F7F7F5] p-5 shadow-sm">
+          <div className="rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-5 shadow-sm">
             <div className="mb-4">
               <h2 className="text-lg font-semibold text-gray-900">Top Critical Patients</h2>
               <p className="mt-1 text-sm text-gray-600">
@@ -661,7 +678,7 @@ function Dashboard() {
                 criticalPatients.map((plan) => (
                   <div
                     key={plan._id}
-                    className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+                    className="rounded-lg border-[2px] border-gray-200 bg-[#FFFDF8] p-4 shadow-sm"
                   >
                     <p className="text-sm font-medium text-gray-900">
                       {plan.patient?.name || "Unknown"}
@@ -783,14 +800,16 @@ function Dashboard() {
                 return (
                   <div
                     key={planId}
-                    className="bg-[#F7F7F5] border border-gray-300/60 rounded-2xl p-6 shadow-sm space-y-4 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 font-sans"
+                    className="rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-6 shadow-sm space-y-4 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 font-sans"
                   >
                     <div className="grid grid-cols-4 gap-6">
                       <div className="col-span-3 space-y-4">
                         <div className="space-y-1.5">
                           <div className="flex items-center justify-between">
                             <div className="flex items-baseline gap-3">
-                              <p className="text-lg font-semibold text-gray-900">{patientName}</p>
+                              <p className="rounded-md bg-yellow-300 px-3 py-1 text-lg font-semibold text-gray-900">
+                                {patientName}
+                              </p>
                               <p className="text-xs text-gray-400">
                                 Age: {patientAge ?? "—"}
                               </p>
@@ -810,7 +829,7 @@ function Dashboard() {
                           </p>
                         </div>
 
-                        <div className="rounded-lg bg-white px-4 py-3 shadow-sm space-y-1.5">
+                        <div className="rounded-lg bg-[#FFFDF8] px-4 py-3 shadow-sm space-y-1.5">
                           <p className="text-xs uppercase tracking-wide text-gray-400">
                             Adherence Score
                           </p>
@@ -889,7 +908,7 @@ function Dashboard() {
                       </div>
 
                       <div className="col-span-1">
-                        <div className="min-h-full rounded-lg bg-white p-3 shadow-sm space-y-4 flex flex-col justify-between">
+                        <div className="min-h-full rounded-lg bg-[#FFFDF8] p-3 shadow-sm space-y-4 flex flex-col justify-between">
                           <div className="space-y-1.5">
                             <p className="text-xs uppercase tracking-wide text-gray-400">Trend</p>
                             <p className="text-sm capitalize text-gray-600">
@@ -900,7 +919,7 @@ function Dashboard() {
                             <p className="text-xs tracking-wide text-gray-400">Change</p>
                             <p className="text-sm text-gray-600">
                               {hasChartPoints
-                                ? `${chartPrevious}${reasonTrend?.unit || ""} → ${chartCurrent}${reasonTrend?.unit || ""}`
+                                ? `${chartPrevious}${reasonTrend?.unit || ""} ? ${chartCurrent}${reasonTrend?.unit || ""}`
                                 : "—"}
                             </p>
                           </div>
@@ -1051,6 +1070,11 @@ function Dashboard() {
 }
 
 export default Dashboard;
+
+
+
+
+
 
 
 

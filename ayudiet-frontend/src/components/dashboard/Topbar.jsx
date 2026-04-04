@@ -11,10 +11,10 @@ function Topbar({ search, setSearch }) {
   return (
     <header
       className="h-16 px-6 flex items-center justify-between
-      bg-black border-b border-neutral-800"
+      bg-white border-b border-gray-300"
     >
       {/* LEFT */}
-      <h1 className="text-sm text-neutral-300">
+      <h1 className="text-sm text-gray-700">
         Welcome back, Doctor 
       </h1>
 
@@ -24,14 +24,14 @@ function Topbar({ search, setSearch }) {
         placeholder="Search patients..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        className="bg-neutral-900 border border-neutral-700 rounded-lg px-4 py-2
-        text-sm text-white outline-none focus:border-neutral-500 w-64"
+        className="rounded-lg border border-gray-300 bg-white px-4 py-2
+        text-sm text-gray-900 outline-none focus:border-gray-500 w-64"
       />
 
       {/* RIGHT */}
       <button
         onClick={handleLogout}
-        className="text-sm text-neutral-300 hover:text-white transition"
+        className="text-sm text-gray-700 hover:text-gray-900 transition"
       >
         Logout
       </button>

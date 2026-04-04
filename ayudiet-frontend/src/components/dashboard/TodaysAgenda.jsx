@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import agendaFrame from "../../assets/agenda-botanical-frame.png";
 
 const initialForm = {
   patientId: "",
@@ -73,11 +74,21 @@ function TodaysAgenda({
   }
 
   return (
-    <div className="rounded-2xl border border-gray-300/60 bg-[#F7F7F5] p-6 shadow-sm">
-      <div className="mb-4 flex items-center justify-between">
-        <div>
-          <h2 className="text-lg font-semibold text-gray-900">Today's Agenda</h2>
-          <p className="mt-1 text-sm text-gray-600">
+    <div
+      className="overflow-hidden rounded-2xl border-[2px] border-black p-6 shadow-sm"
+      style={{
+        backgroundImage: `url(${agendaFrame})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }}
+    >
+      <div className="mb-4 flex items-start justify-between gap-4">
+        <div className="min-w-0 flex-1">
+          <h2 className="inline-block rounded-md bg-yellow-300 px-3 py-1 text-lg font-semibold text-gray-900">
+            Today's Agenda
+          </h2>
+          <p className="mt-2 inline-block rounded bg-white/90 px-2 py-0.5 text-sm text-gray-800">
             Focus on the next visit and track what is already done.
           </p>
         </div>
@@ -85,7 +96,7 @@ function TodaysAgenda({
         <button
           type="button"
           onClick={() => setShowForm((current) => !current)}
-          className="text-sm text-gray-600 transition hover:text-gray-900"
+          className="shrink-0 whitespace-nowrap rounded bg-white/90 px-3 py-1.5 text-sm font-medium text-gray-800 transition hover:bg-white hover:text-gray-900"
         >
           {showForm ? "Close" : "+ Add New"}
         </button>
@@ -94,7 +105,7 @@ function TodaysAgenda({
       {showForm && (
         <form
           onSubmit={handleSubmit}
-          className="mb-4 space-y-4 rounded-lg border border-gray-200 bg-gray-50 p-4"
+          className="mb-4 space-y-4 rounded-lg border-[2px] border-gray-200 bg-gray-50 p-4"
         >
           <div className="grid gap-4 md:grid-cols-2">
             <label className="block">
@@ -179,7 +190,7 @@ function TodaysAgenda({
 
       <div className="space-y-4">
         {agenda.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-gray-300 px-4 py-6 text-sm text-gray-600">
+          <div className="rounded-lg border-[2px] border-dashed border-gray-300 px-4 py-6 text-sm text-gray-600">
             No agenda items yet. Add one to schedule the next patient interaction.
           </div>
         ) : null}
@@ -187,7 +198,7 @@ function TodaysAgenda({
         {agenda.map((item) => (
           <div
             key={item.id}
-            className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
+            className="rounded-lg border-[2px] border-gray-200 bg-[#FFFDF8] p-4 shadow-sm"
           >
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
@@ -244,3 +255,4 @@ function TodaysAgenda({
 }
 
 export default TodaysAgenda;
+

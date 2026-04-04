@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchJson } from "../../services/api";
+import agendaFrame from "../../assets/agenda-botanical-frame.png";
 
 function Patients() {
   const navigate = useNavigate();
@@ -36,7 +37,13 @@ function Patients() {
             {patients.map((p) => (
               <div
                 key={p._id}
-                className="w-full rounded-xl border border-gray-300/60 bg-[#F7F7F5] p-4 shadow-sm"
+                className="w-full overflow-hidden rounded-xl border-[2px] border-black p-4 shadow-sm"
+                style={{
+                  backgroundImage: `url(${agendaFrame})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                }}
               >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
@@ -72,3 +79,4 @@ function Patients() {
 }
 
 export default Patients;
+

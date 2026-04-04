@@ -30,10 +30,12 @@ function PatientsTable({
   console.log("Patients count:", patients?.length || 0);
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-300/60 bg-[#F7F7F5] shadow-sm">
+    <div className="overflow-hidden rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] shadow-sm">
       <div className="border-b border-gray-200 px-6 py-4">
-        <h2 className="text-lg font-semibold text-gray-900">Patient Intelligence</h2>
-        <p className="mt-1 text-sm text-gray-600">
+        <h2 className="inline-block rounded-md bg-yellow-300 px-3 py-1 text-lg font-semibold text-gray-900">
+          Patient Intelligence
+        </h2>
+        <p className="mt-2 inline-block rounded bg-white/90 px-2 py-0.5 text-sm text-gray-800">
           Review effectiveness, dominant issue, and trend before opening a case.
         </p>
       </div>
@@ -156,3 +158,4 @@ function PatientsTable({
 }
 
 export default PatientsTable;
+

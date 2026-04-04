@@ -25,6 +25,7 @@ const MOCK_PATIENTS = [
     name: "Rohit Sharma",
     age: 35,
     gender: "male",
+    phone: "9876543201",
     baseWeight: 92,
     caseType: "good_improving",
   },
@@ -32,6 +33,7 @@ const MOCK_PATIENTS = [
     name: "Anita Verma",
     age: 28,
     gender: "female",
+    phone: "9876543202",
     baseWeight: 74,
     caseType: "bad_adherence_declining",
   },
@@ -39,6 +41,7 @@ const MOCK_PATIENTS = [
     name: "Karan Patel",
     age: 40,
     gender: "male",
+    phone: "9876543203",
     baseWeight: 86,
     caseType: "low_energy",
   },
@@ -46,6 +49,7 @@ const MOCK_PATIENTS = [
     name: "Meera Singh",
     age: 30,
     gender: "female",
+    phone: "9876543204",
     baseWeight: 69,
     caseType: "no_progress",
   },
@@ -53,6 +57,7 @@ const MOCK_PATIENTS = [
     name: "Vikas Gupta",
     age: 45,
     gender: "male",
+    phone: "9876543205",
     baseWeight: 94,
     caseType: "low_adherence_improving",
   },
@@ -60,8 +65,17 @@ const MOCK_PATIENTS = [
     name: "Pooja Nair",
     age: 33,
     gender: "female",
+    phone: "9876543206",
     baseWeight: 71,
     caseType: "mixed_decline",
+  },
+  {
+    name: "Arjun Mehta",
+    age: 38,
+    gender: "male",
+    phone: "9876543207",
+    baseWeight: 88,
+    caseType: "bad_adherence_declining",
   },
 ];
 
@@ -207,9 +221,10 @@ const main = async () => {
 
     console.log(`Seeding mock data for doctor: ${DOCTOR_EMAIL}`);
 
+    const mockPatientNames = MOCK_PATIENTS.map((item) => item.name);
     const existingPatients = await Patient.find({
       doctor: doctor._id,
-      isMock: true,
+      name: { $in: mockPatientNames },
     }).select("_id");
     const existingPatientIds = existingPatients.map((patient) => patient._id);
 
@@ -239,6 +254,7 @@ const main = async () => {
         name: patientSeed.name,
         age: patientSeed.age,
         gender: patientSeed.gender,
+        phone: patientSeed.phone,
         weight: patientSeed.baseWeight,
         doctor: doctor._id,
         isMock: true,
