@@ -82,8 +82,8 @@ function PatientsTable({
                 </td>
                 <td className="border-r border-gray-200 px-4 py-3 text-gray-600">
                   <div className="inline-flex items-center gap-2">
-                    {TrendIcon ? <TrendIcon className="h-4 w-4" /> : null}
-                    <span>{formatTrendLabel?.(trend) || trend}</span>
+                    {TrendIcon ? <TrendIcon className={`h-4 w-4 ${trendMeta?.className || ""}`} /> : null}
+                    <span className={trendMeta?.className || ""}>{formatTrendLabel?.(trend) || trend}</span>
                   </div>
                 </td>
 

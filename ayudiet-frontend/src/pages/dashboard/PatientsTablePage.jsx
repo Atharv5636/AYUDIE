@@ -6,6 +6,7 @@ import PatientsTable from "../../components/dashboard/PatientsTable";
 import { deletePatient } from "../../services/patient.service";
 import { fetchPlansByPatient } from "../../services/plan.service";
 import { fetchJson } from "../../services/api";
+import { getTrend, getTrendLabel } from "@/utils/trendUtils";
 
 function PatientsTablePage() {
   const outletContext = useOutletContext();
@@ -32,10 +33,18 @@ function PatientsTablePage() {
     entry?.planAnalysis ||
     null;
 
-  const getTrendValue = (entry) =>
-    getPlanAnalysis(entry)?.effectivenessTrend?.trend ||
-    entry?.effectivenessTrend?.trend ||
-    null;
+  const getTrendValue = (entry) => {
+    const trend = getPlanAnalysis(entry)?.effectivenessTrend || entry?.effectivenessTrend;
+
+    if (
+      typeof trend?.previous === "number" &&
+      typeof trend?.current === "number"
+    ) {
+      return getTrend(trend.previous, trend.current);
+    }
+
+    return "stable";
+  };
 
   const getTrendDelta = (entry) => {
     const trend = getPlanAnalysis(entry)?.effectivenessTrend || entry?.effectivenessTrend;
@@ -44,7 +53,7 @@ function PatientsTablePage() {
       typeof trend?.previous === "number" &&
       typeof trend?.current === "number"
     ) {
-      return `${trend.previous} -> ${trend.current}`;
+      return `${trend.previous} → ${trend.current}`;
     }
 
     return "No delta";
@@ -83,17 +92,14 @@ function PatientsTablePage() {
     };
   };
 
-  const formatTrendLabel = (trend) => {
-    if (!trend) return "Stable";
-    return trend.replaceAll("_", " ").replace(/\b\w/g, (char) => char.toUpperCase());
-  };
+  const formatTrendLabel = (trend) => getTrendLabel(trend);
 
   const getTrendTone = (trend) => {
-    if (trend === "declining" || trend === "slight_decline") {
+    if (trend === "down") {
       return "text-gray-700";
     }
 
-    if (trend === "improving" || trend === "slight_improvement") {
+    if (trend === "up") {
       return "text-gray-700";
     }
 
@@ -101,18 +107,18 @@ function PatientsTablePage() {
   };
 
   const getTrendMeta = (trend) => {
-    if (trend === "declining" || trend === "slight_decline") {
+    if (trend === "down") {
       return {
         icon: ArrowDownRight,
-        className: "text-gray-700",
+        className: "text-red-600",
         chipClassName: "bg-black text-white",
       };
     }
 
-    if (trend === "improving" || trend === "slight_improvement") {
+    if (trend === "up") {
       return {
         icon: ArrowUpRight,
-        className: "text-gray-700",
+        className: "text-green-600",
         chipClassName: "bg-gray-100 text-gray-700",
       };
     }

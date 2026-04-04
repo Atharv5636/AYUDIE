@@ -3,6 +3,8 @@ import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
 
 import PlansAwaitingReview from "../../components/dashboard/PlansAwaitingReview";
 import TodaysAgenda from "../../components/dashboard/TodaysAgenda";
+import TrendBarChart from "../../components/dashboard/TrendBarChart";
+import { getTrend, getTrendColor, getTrendLabel } from "@/utils/trendUtils";
 
 import {
   approvePlan,
@@ -126,10 +128,18 @@ function Dashboard() {
     entry?.planAnalysis ||
     null;
 
-  const getTrendValue = (entry) =>
-    getPlanAnalysis(entry)?.effectivenessTrend?.trend ||
-    entry?.effectivenessTrend?.trend ||
-    null;
+  const getTrendValue = (entry) => {
+    const trend = getPlanAnalysis(entry)?.effectivenessTrend || entry?.effectivenessTrend;
+
+    if (
+      typeof trend?.previous === "number" &&
+      typeof trend?.current === "number"
+    ) {
+      return getTrend(trend.previous, trend.current);
+    }
+
+    return "stable";
+  };
 
   const getTrendDelta = (entry) => {
     const trend = getPlanAnalysis(entry)?.effectivenessTrend || entry?.effectivenessTrend;
@@ -138,7 +148,7 @@ function Dashboard() {
       typeof trend?.previous === "number" &&
       typeof trend?.current === "number"
     ) {
-      return `${trend.previous} -> ${trend.current}`;
+      return `${trend.previous} → ${trend.current}`;
     }
 
     return "No delta";
@@ -183,11 +193,8 @@ function Dashboard() {
             ? plan.dashboardIntelligence.score
             : 0);
 
-    const trend = (
-      analysis?.trend ||
-      plan?.dashboardIntelligence?.trend ||
-      ""
-    ).toLowerCase();
+    const trendInfo = analysis?.effectivenessTrend || plan?.effectivenessTrend;
+    const trend = getTrend(trendInfo?.previous, trendInfo?.current);
     const issue = (
       analysis?.primaryIssue ||
       plan?.dashboardIntelligence?.primaryIssue ||
@@ -198,7 +205,7 @@ function Dashboard() {
     else if (effectiveness < 55) score += 2;
     else if (effectiveness < 75) score += 1;
 
-    if (trend === "declining") score += 3;
+    if (trend === "down") score += 3;
     else if (trend === "stable") score += 1;
 
     if (issue.includes("adherence")) score += 2;
@@ -338,22 +345,19 @@ function Dashboard() {
 
     return (
       (typeof score === "number" && score < 60) ||
-      trend === "declining" ||
+      trend === "down" ||
       primaryIssue === "adherence"
     );
   };
 
-  const formatTrendLabel = (trend) => {
-    if (!trend) return "Stable";
-    return trend.replaceAll("_", " ").replace(/\b\w/g, (char) => char.toUpperCase());
-  };
+  const formatTrendLabel = (trend) => getTrendLabel(trend);
 
   const getTrendTone = (trend) => {
-    if (trend === "declining" || trend === "slight_decline") {
+    if (trend === "down") {
       return "text-gray-700";
     }
 
-    if (trend === "improving" || trend === "slight_improvement") {
+    if (trend === "up") {
       return "text-gray-700";
     }
 
@@ -361,18 +365,18 @@ function Dashboard() {
   };
 
   const getTrendMeta = (trend) => {
-    if (trend === "declining" || trend === "slight_decline") {
+    if (trend === "down") {
       return {
         icon: ArrowDownRight,
-        className: "text-gray-700",
+        className: "text-red-600",
         chipClassName: "bg-black text-white",
       };
     }
 
-    if (trend === "improving" || trend === "slight_improvement") {
+    if (trend === "up") {
       return {
         icon: ArrowUpRight,
-        className: "text-gray-700",
+        className: "text-green-600",
         chipClassName: "bg-gray-100 text-gray-700",
       };
     }
@@ -416,7 +420,7 @@ function Dashboard() {
 
   const decliningPlans = plansWithScore.filter(
     (plan) =>
-      (plan.analysis?.trend || "").toLowerCase() === "declining"
+      getTrendValue(plan) === "down"
   ).length;
 
   const lowAdherenceCases = plansWithScore.filter((plan) => {
@@ -825,10 +829,6 @@ function Dashboard() {
             <div className="space-y-4">
               {paginatedActivePlans.map((plan) => {
                 const planId = String(plan?._id);
-                const trend =
-                  plan.analysis?.trend ??
-                  plan.analysis?.effectivenessTrend?.trend ??
-                  "-";
                 const trendInfo = plan.analysis?.effectivenessTrend || {};
                 const trendPrevious =
                   typeof trendInfo.previous === "number"
@@ -852,6 +852,49 @@ function Dashboard() {
                   typeof chartPrevious === "number" &&
                   typeof chartCurrent === "number";
                 const chartUnit = reasonTrend?.unit || "";
+                const defaultChartData = [
+                  { name: "1", value: 63 },
+                  { name: "2", value: 60 },
+                  { name: "3", value: 58 },
+                  { name: "4", value: 55 },
+                  { name: "5", value: 50 },
+                ];
+                const adherenceHistory = Array.isArray(plan?.adherenceHistory)
+                  ? plan.adherenceHistory
+                  : Array.isArray(plan?.analysis?.adherenceHistory)
+                    ? plan.analysis.adherenceHistory
+                    : [];
+                const sortedHistory = [...adherenceHistory].sort((a, b) => {
+                  const aTime = new Date(
+                    a?.date || a?.createdAt || a?.loggedAt || 0
+                  ).getTime();
+                  const bTime = new Date(
+                    b?.date || b?.createdAt || b?.loggedAt || 0
+                  ).getTime();
+                  if (!Number.isFinite(aTime) || !Number.isFinite(bTime)) return 0;
+                  return aTime - bTime;
+                });
+                const mappedHistoryData = sortedHistory
+                  .map((item, index) => {
+                    if (typeof item === "number") return { name: `${index + 1}`, value: item };
+                    if (typeof item?.score === "number") {
+                      return { name: `${index + 1}`, value: item.score };
+                    }
+                    if (typeof item?.value === "number") {
+                      return { name: `${index + 1}`, value: item.value };
+                    }
+                    return null;
+                  })
+                  .filter(Boolean);
+                const chartData =
+                  mappedHistoryData.length > 1
+                    ? mappedHistoryData
+                    : hasChartPoints
+                      ? [
+                          { name: "1", value: chartPrevious },
+                          { name: "2", value: chartCurrent },
+                        ]
+                      : defaultChartData;
                 const formatChartValue = (value) =>
                   typeof value === "number"
                     ? Number.isInteger(value)
@@ -859,35 +902,11 @@ function Dashboard() {
                       : value.toFixed(1)
                     : "-";
                 const chartChangeLabel = hasChartPoints
-                  ? `${formatChartValue(chartPrevious)}${chartUnit} -> ${formatChartValue(chartCurrent)}${chartUnit}`
+                  ? `${formatChartValue(chartPrevious)}${chartUnit} → ${formatChartValue(chartCurrent)}${chartUnit}`
                   : "-";
-                const chartMeta = (() => {
-                  if (!hasChartPoints) return null;
-
-                  const minValue = Math.min(chartPrevious, chartCurrent);
-                  const maxValue = Math.max(chartPrevious, chartCurrent);
-                  const spread = maxValue - minValue || 1;
-                  const topY = 10;
-                  const graphHeight = 28;
-                  const startX = 12;
-                  const endX = 108;
-                  const toY = (value) =>
-                    topY + graphHeight - ((value - minValue) / spread) * graphHeight;
-
-                  return {
-                    startX,
-                    endX,
-                    y1: toY(chartPrevious),
-                    y2: toY(chartCurrent),
-                  };
-                })();
-                const normalizedTrend = String(trend).toLowerCase();
-                const trendDirection =
-                  normalizedTrend.includes("declin")
-                    ? "declining"
-                    : normalizedTrend.includes("improv")
-                      ? "improving"
-                      : "stable";
+                const chartTrend = getTrend(chartPrevious, chartCurrent);
+                const trendLabel = getTrendLabel(chartTrend);
+                const trendColor = getTrendColor(chartTrend);
                 const patientName = plan.patient?.name || "Unknown Patient";
                 const patientAge =
                   plan?.patient?.age ??
@@ -1035,27 +1054,13 @@ function Dashboard() {
                         <div className="min-h-full rounded-xl bg-gray-50 p-3 space-y-4 flex flex-col justify-between">
                           <div className="space-y-1.5">
                             <p className="text-xs uppercase tracking-wide text-gray-400">Trend</p>
-                            <p className="text-sm capitalize text-gray-600">
-                              {trend === "-" ? "-" : trendDirection}
+                            <p className="text-sm text-gray-600" style={{ color: trendColor }}>
+                              {trendLabel}
                             </p>
                           </div>
 
-                          <div className="flex h-24 items-center justify-center overflow-hidden rounded-md border border-gray-200 bg-white p-2">
-                            <svg viewBox="0 0 120 64" className="h-full w-full" aria-hidden="true">
-                              <line x1="8" y1="56" x2="112" y2="56" stroke="#d1d5db" strokeWidth="2" />
-                              {chartMeta ? (
-                                <>
-                                  <rect x="20" y={Math.min(chartMeta.y1, 52)} width="14" height={56 - Math.min(chartMeta.y1, 52)} rx="2" fill="#9ca3af" />
-                                  <rect x="72" y={Math.min(chartMeta.y2, 52)} width="14" height={56 - Math.min(chartMeta.y2, 52)} rx="2" fill="#6b7280" />
-                                  <path d={`M27 ${chartMeta.y1} L79 ${chartMeta.y2}`} stroke="#374151" strokeWidth="2.5" fill="none" />
-                                </>
-                              ) : (
-                                <>
-                                  <rect x="20" y="30" width="14" height="26" rx="2" fill="#9ca3af" />
-                                  <rect x="72" y="24" width="14" height="32" rx="2" fill="#6b7280" />
-                                </>
-                              )}
-                            </svg>
+                          <div className="bg-gray-50 rounded-xl p-3">
+                            <TrendBarChart data={chartData} trend={chartTrend} />
                           </div>
 
                           <div className="space-y-1.5">
