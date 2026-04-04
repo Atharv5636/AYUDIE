@@ -71,6 +71,10 @@ function PatientDetails() {
     notes: "",
   });
   const [toast, setToast] = useState("");
+  const [progressPage, setProgressPage] = useState(1);
+  const [historyPage, setHistoryPage] = useState(1);
+  const PROGRESS_LOGS_PER_PAGE = 2;
+  const PLAN_HISTORY_PER_PAGE = 4;
 
   const plans = usePlansStore((state) => state.patientPlans[id]);
   const setPatientPlans = usePlansStore((state) => state.setPatientPlans);
@@ -178,6 +182,43 @@ function PatientDetails() {
       adherence,
     };
   }, [progressLogs]);
+
+  const totalProgressPages = Math.max(
+    1,
+    Math.ceil(progressLogs.length / PROGRESS_LOGS_PER_PAGE)
+  );
+
+  const paginatedProgressLogs = useMemo(() => {
+    const start = (progressPage - 1) * PROGRESS_LOGS_PER_PAGE;
+    return progressLogs.slice(start, start + PROGRESS_LOGS_PER_PAGE);
+  }, [progressLogs, progressPage]);
+
+  const progressStartIndex = (progressPage - 1) * PROGRESS_LOGS_PER_PAGE;
+  const progressEndIndex = Math.min(
+    progressStartIndex + PROGRESS_LOGS_PER_PAGE,
+    progressLogs.length
+  );
+
+  const historicalPlans = useMemo(
+    () => visiblePlans.filter((plan) => !plan.isActive),
+    [visiblePlans]
+  );
+
+  const totalHistoryPages = Math.max(
+    1,
+    Math.ceil(historicalPlans.length / PLAN_HISTORY_PER_PAGE)
+  );
+
+  const paginatedHistoryPlans = useMemo(() => {
+    const start = (historyPage - 1) * PLAN_HISTORY_PER_PAGE;
+    return historicalPlans.slice(start, start + PLAN_HISTORY_PER_PAGE);
+  }, [historicalPlans, historyPage]);
+
+  const historyStartIndex = (historyPage - 1) * PLAN_HISTORY_PER_PAGE;
+  const historyEndIndex = Math.min(
+    historyStartIndex + PLAN_HISTORY_PER_PAGE,
+    historicalPlans.length
+  );
 
   const resetBuilder = () => {
     setShowForm(false);
@@ -532,12 +573,20 @@ function PatientDetails() {
     }));
   }, [patient]);
 
+  useEffect(() => {
+    setProgressPage(1);
+  }, [progressLogs.length]);
+
+  useEffect(() => {
+    setHistoryPage(1);
+  }, [historicalPlans.length]);
+
   if (loading) {
-    return <p className="text-neutral-400">Loading...</p>;
+    return <p className="text-gray-600">Loading...</p>;
   }
 
   if (!patient) {
-    return <p className="text-red-400">Patient not found</p>;
+    return <p className="text-red-600">Patient not found</p>;
   }
 
   return (
@@ -548,14 +597,16 @@ function PatientDetails() {
         </div>
       )}
 
-      <Link to="/dashboard" className="text-sm text-secondary hover:underline">
+      <Link to="/dashboard" className="text-sm text-gray-700 hover:underline">
         Back to Dashboard
       </Link>
 
-      <div className="space-y-10 rounded-3xl border border-white/15 bg-white/10 p-8 shadow-2xl shadow-black/20 backdrop-blur-md md:p-10">
-        <h1 className="text-3xl font-semibold tracking-tight text-white">
-          {patient?.name}
-        </h1>
+      <div className="space-y-8">
+        <div className="rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-6 shadow-sm md:p-7">
+          <h1 className="text-3xl font-semibold tracking-tight text-gray-900">
+            {patient?.name}
+          </h1>
+        </div>
 
         <Section title="Basic Information">
           <Info label="Age" value={`${patient?.age || "-"} yrs`} />
@@ -570,9 +621,9 @@ function PatientDetails() {
           />
         </Section>
 
-        <div className="mt-6 space-y-6 rounded-2xl border border-white/10 bg-gray-900/70 p-6 md:p-7">
+        <div className="mt-6 space-y-6 rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-6 md:p-7">
           <div className="flex items-center justify-between gap-4">
-            <h2 className="text-2xl font-semibold text-white">Active Diet Plan</h2>
+            <h2 className="text-2xl font-semibold text-gray-900">Active Diet Plan</h2>
 
             {!showForm && (
               <button
@@ -589,13 +640,13 @@ function PatientDetails() {
 
           {activePlan ? (
             <div className="space-y-5">
-              <div className="rounded-2xl border border-white/10 bg-black/20 p-5">
+              <div className="rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-5">
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <p className="text-lg font-semibold text-white">
+                    <p className="text-lg font-semibold text-gray-900">
                       {activePlan.title}
                     </p>
-                    <p className="mt-1 text-sm text-gray-400">
+                    <p className="mt-1 text-sm text-gray-600">
                       Dosha: {activePlan.doshaType} | Review due:{" "}
                       {new Date(activePlan.reviewDueDate).toLocaleDateString()}
                     </p>
@@ -603,7 +654,7 @@ function PatientDetails() {
                   <button
                     type="button"
                     onClick={() => startEditingPlan(activePlan)}
-                    className="text-sm font-medium text-blue-300 transition hover:text-blue-200"
+                    className="text-sm font-medium text-blue-600 transition hover:text-blue-700"
                   >
                     Edit Plan
                   </button>
@@ -616,35 +667,35 @@ function PatientDetails() {
               />
             </div>
           ) : (
-            <p className="text-gray-400">No active plan</p>
+            <p className="text-gray-600">No active plan</p>
           )}
 
           {showForm && (
-            <div className="mt-4 space-y-6 rounded-2xl border border-white/10 bg-black/35 p-6 md:p-7">
+            <div className="mt-4 space-y-6 rounded-2xl border-[2px] border-gray-300/60 bg-white p-6 md:p-7">
               <div className="flex items-center justify-between gap-4">
-                <h3 className="text-2xl font-semibold text-white">
+                <h3 className="text-2xl font-semibold text-gray-900">
                   {editingPlanId ? "Editing Mode" : "Create Plan"}
                 </h3>
                 {editingPlanId && (
-                  <span className="rounded-full border border-green-400/20 bg-green-500/10 px-3 py-1 text-sm text-green-300">
+                  <span className="rounded-full border border-green-200 bg-green-50 px-3 py-1 text-sm text-green-700">
                     Updating existing plan
                   </span>
                 )}
               </div>
 
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <input
                   type="text"
                   placeholder="Plan Title"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-gray-900/90 px-4 py-3 text-white placeholder:text-gray-500 focus:border-green-500/50 focus:outline-none"
+                  className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 placeholder:text-gray-500 focus:border-green-500/50 focus:outline-none"
                 />
 
-                <select
+                  <select
                   value={goal}
                   onChange={(e) => setGoal(e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-gray-900/90 px-4 py-3 text-white focus:border-green-500/50 focus:outline-none"
+                  className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 focus:border-green-500/50 focus:outline-none"
                 >
                   <option value="">Select Goal</option>
                   <option value="weight loss">Weight Loss</option>
@@ -656,7 +707,7 @@ function PatientDetails() {
                 <select
                   value={dosha}
                   onChange={(e) => setDosha(e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-gray-900/90 px-4 py-3 text-white focus:border-green-500/50 focus:outline-none"
+                  className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 focus:border-green-500/50 focus:outline-none"
                 >
                   <option value="">Select Dosha</option>
                   <option value="vata">Vata</option>
@@ -668,14 +719,14 @@ function PatientDetails() {
                   type="date"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="w-full rounded-xl border border-white/10 bg-gray-900/90 px-4 py-3 text-white focus:border-green-500/50 focus:outline-none"
+                  className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 focus:border-green-500/50 focus:outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                 <div className="space-y-5 lg:col-span-2">
                   <div className="flex items-center justify-between gap-4">
-                    <h3 className="text-xl font-semibold text-white">
+                    <h3 className="text-xl font-semibold text-gray-900">
                       Meal Builder
                     </h3>
                     <div className="flex flex-wrap items-center gap-3">
@@ -683,7 +734,7 @@ function PatientDetails() {
                         type="button"
                         onClick={handleGenerateWithAi}
                         disabled={isGeneratingAi}
-                        className="rounded-xl border border-blue-500/60 px-4 py-2.5 text-sm font-medium text-blue-300 transition hover:bg-blue-500/10 disabled:opacity-60"
+                        className="rounded-xl border border-blue-300 px-4 py-2.5 text-sm font-medium text-blue-700 transition hover:bg-blue-50 disabled:opacity-60"
                       >
                         {isGeneratingAi
                           ? "Generating diet plan..."
@@ -693,7 +744,7 @@ function PatientDetails() {
                         type="button"
                         onClick={handleAutoImprovePlan}
                         disabled={isImprovingPlan}
-                        className="rounded-xl border border-amber-500/60 px-4 py-2.5 text-sm font-medium text-amber-300 transition hover:bg-amber-500/10 disabled:opacity-60"
+                        className="rounded-xl border border-amber-300 px-4 py-2.5 text-sm font-medium text-amber-700 transition hover:bg-amber-50 disabled:opacity-60"
                       >
                         {isImprovingPlan
                           ? "Improving plan..."
@@ -702,7 +753,7 @@ function PatientDetails() {
                       <button
                         type="button"
                         onClick={addDay}
-                        className="rounded-xl border border-green-500/60 px-4 py-2.5 text-sm font-medium text-green-300 transition hover:bg-green-500/10"
+                        className="rounded-xl border border-green-300 px-4 py-2.5 text-sm font-medium text-green-700 transition hover:bg-green-50"
                       >
                         Add Day
                       </button>
@@ -713,9 +764,9 @@ function PatientDetails() {
                     {days.map((day, index) => (
                       <div
                         key={`${day.day}-${index}`}
-                        className="rounded-2xl border border-white/10 bg-gray-950/65 p-5 shadow-lg shadow-black/10 md:p-6"
+                        className="rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-5 shadow-sm md:p-6"
                       >
-                        <div className="mb-5 flex items-center justify-between gap-4 border-b border-white/10 pb-4">
+                        <div className="mb-5 flex items-center justify-between gap-4 border-b border-gray-200 pb-4">
                           <div className="space-y-1">
                             <p className="text-xs uppercase tracking-[0.2em] text-gray-500">
                               Day Plan
@@ -726,7 +777,7 @@ function PatientDetails() {
                               onChange={(e) =>
                                 updateDayField(index, "day", e.target.value)
                               }
-                              className="bg-transparent text-xl font-semibold text-white outline-none"
+                              className="bg-transparent text-xl font-semibold text-gray-900 outline-none"
                             />
                           </div>
 
@@ -734,7 +785,7 @@ function PatientDetails() {
                             <button
                               type="button"
                               onClick={() => removeDay(index)}
-                              className="text-sm font-medium text-red-300 transition hover:text-red-200"
+                              className="text-sm font-medium text-red-600 transition hover:text-red-700"
                             >
                               Remove
                             </button>
@@ -779,7 +830,7 @@ function PatientDetails() {
                     <ChangesMadeCard changes={autoFixChanges} />
                   )}
 
-                  <div className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+                  <div className="space-y-3 rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-5">
                     <p className="text-sm uppercase tracking-[0.2em] text-gray-500">
                       Actions
                     </p>
@@ -792,7 +843,7 @@ function PatientDetails() {
                     <button
                       type="button"
                       onClick={resetBuilder}
-                      className="w-full rounded-xl border border-white/20 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-white/5"
+                      className="w-full rounded-xl border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
                     >
                       Cancel
                     </button>
@@ -800,14 +851,14 @@ function PatientDetails() {
                 </div>
 
                 {lastGeneratedContext && (
-                  <div className="space-y-2 rounded-xl border border-blue-400/15 bg-blue-500/5 px-4 py-3">
-                    <p className="text-sm text-blue-100">
+                  <div className="space-y-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3">
+                    <p className="text-sm text-blue-800">
                       Generated for: {lastGeneratedContext.goal} |{" "}
                       {lastGeneratedContext.doshaType} |{" "}
                       {lastGeneratedContext.weight} kg
                     </p>
                     {lastProgressInsights.length > 0 && (
-                      <p className="text-xs text-blue-200/80">
+                      <p className="text-xs text-blue-700">
                         Plan adjusted based on recent progress:{" "}
                         {lastProgressInsights.join(" | ")}
                       </p>
@@ -819,22 +870,20 @@ function PatientDetails() {
           )}
         </div>
 
-        <div className="mt-8 rounded-2xl border border-white/10 bg-gray-900/70 p-6 md:p-7">
-          <h2 className="mb-4 text-2xl font-semibold text-white">Plan History</h2>
+        <div className="mt-8 rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-6 md:p-7">
+          <h2 className="mb-4 text-2xl font-semibold text-gray-900">Plan History</h2>
 
-          {visiblePlans.length === 0 ? (
-            <p className="text-gray-400">No plans found</p>
+          {historicalPlans.length === 0 ? (
+            <p className="text-gray-600">No plans found</p>
           ) : (
             <div className="space-y-4">
-              {visiblePlans
-                .filter((plan) => !plan.isActive)
-                .map((plan) => {
+              {paginatedHistoryPlans.map((plan) => {
                   const isExpanded = expandedPlanId === plan._id;
 
                   return (
                     <div
                       key={plan._id}
-                      className="space-y-4 rounded-2xl border border-white/10 bg-black/25 p-5"
+                      className="space-y-4 rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-5 shadow-sm"
                     >
                       <button
                         type="button"
@@ -844,10 +893,10 @@ function PatientDetails() {
                         className="flex w-full items-center justify-between gap-4 text-left"
                       >
                         <div>
-                          <p className="text-base font-medium text-white">
+                          <p className="text-base font-medium text-gray-900">
                             {plan.title}
                           </p>
-                          <p className="text-sm text-gray-400">
+                          <p className="text-sm text-gray-600">
                             {plan.status} | Created{" "}
                             {new Date(plan.createdAt).toLocaleDateString()}
                           </p>
@@ -859,11 +908,11 @@ function PatientDetails() {
                               event.stopPropagation();
                               startEditingPlan(plan);
                             }}
-                            className="text-sm font-medium text-blue-300 transition hover:text-blue-200"
+                            className="text-sm font-medium text-blue-600 transition hover:text-blue-700"
                           >
                             Edit Plan
                           </button>
-                          <span className="text-sm text-green-300">
+                          <span className="text-sm text-green-700">
                             {isExpanded ? "Hide meals" : "View meals"}
                           </span>
                         </div>
@@ -880,6 +929,39 @@ function PatientDetails() {
                     </div>
                   );
                 })}
+
+              <div className="mt-4 border-t border-gray-200 pt-3">
+                <div className="flex items-center justify-center gap-6 sm:gap-10">
+                  <button
+                    type="button"
+                    onClick={() => setHistoryPage((p) => Math.max(p - 1, 1))}
+                    disabled={historyPage === 1 || historicalPlans.length === 0}
+                    className="rounded border border-gray-300 bg-white px-3 py-1 text-xs text-gray-700 disabled:opacity-50"
+                  >
+                    Prev
+                  </button>
+
+                  {historicalPlans.length > 0 && (
+                    <p className="text-xs text-gray-600">
+                      Showing {historyStartIndex + 1}-{historyEndIndex} of{" "}
+                      {historicalPlans.length}
+                    </p>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setHistoryPage((p) => Math.min(p + 1, totalHistoryPages))
+                    }
+                    disabled={
+                      historyPage === totalHistoryPages || historicalPlans.length === 0
+                    }
+                    className="rounded border border-gray-300 bg-white px-3 py-1 text-xs text-gray-700 disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
             </div>
           )}
         </div>
@@ -900,19 +982,19 @@ function PatientDetails() {
           <Info label="Preferences" value={patient?.preferences || "-"} />
         </Section>
 
-        <div className="space-y-6 rounded-2xl border border-white/10 bg-gray-900/70 p-6 md:p-7">
+        <div className="space-y-6 rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-6 md:p-7">
           <div className="space-y-1">
-            <h2 className="text-2xl font-semibold text-white">
+            <h2 className="text-2xl font-semibold text-gray-900">
               Progress Tracking
             </h2>
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-gray-600">
               Track weight, energy, digestion, and adherence over time.
             </p>
           </div>
 
-          <div className="space-y-4 rounded-2xl border border-white/10 bg-black/25 p-5">
+          <div className="space-y-4 rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-5">
             <div className="flex items-center gap-2">
-              <p className="text-lg font-semibold text-white">Trend Summary</p>
+              <p className="text-lg font-semibold text-gray-900">Trend Summary</p>
             </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <TrendCard
@@ -936,11 +1018,11 @@ function PatientDetails() {
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             <form
               onSubmit={handleSubmitProgress}
-              className="space-y-4 rounded-2xl border border-white/10 bg-black/25 p-5"
+              className="space-y-4 rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-5"
             >
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <label className="space-y-2">
-                  <span className="text-sm text-gray-300">Weight (kg)</span>
+                  <span className="text-sm text-gray-700">Weight (kg)</span>
                   <input
                     type="number"
                     step="0.1"
@@ -948,18 +1030,18 @@ function PatientDetails() {
                     onChange={(event) =>
                       handleProgressFieldChange("weight", event.target.value)
                     }
-                    className="w-full rounded-xl border border-white/10 bg-gray-900/90 px-4 py-3 text-white focus:border-green-500/50 focus:outline-none"
+                    className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 focus:border-green-500/50 focus:outline-none"
                   />
                 </label>
 
                 <label className="space-y-2">
-                  <span className="text-sm text-gray-300">Energy Level</span>
+                  <span className="text-sm text-gray-700">Energy Level</span>
                   <select
                     value={progressForm.energyLevel}
                     onChange={(event) =>
                       handleProgressFieldChange("energyLevel", event.target.value)
                     }
-                    className="w-full rounded-xl border border-white/10 bg-gray-900/90 px-4 py-3 text-white focus:border-green-500/50 focus:outline-none"
+                    className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 focus:border-green-500/50 focus:outline-none"
                   >
                     {[1, 2, 3, 4, 5].map((level) => (
                       <option key={level} value={level}>
@@ -972,43 +1054,43 @@ function PatientDetails() {
 
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <label className="space-y-2">
-                  <span className="text-sm text-gray-300">Digestion</span>
+                  <span className="text-sm text-gray-700">Digestion</span>
                   <select
                     value={progressForm.digestion}
                     onChange={(event) =>
                       handleProgressFieldChange("digestion", event.target.value)
                     }
-                    className="w-full rounded-xl border border-white/10 bg-gray-900/90 px-4 py-3 text-white focus:border-green-500/50 focus:outline-none"
+                    className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 focus:border-green-500/50 focus:outline-none"
                   >
                     <option value="good">Good</option>
                     <option value="bad">Bad</option>
                   </select>
                 </label>
 
-                <label className="flex items-center gap-3 rounded-xl border border-white/10 bg-gray-900/60 px-4 py-3">
+                <label className="flex items-center gap-3 rounded-xl border border-gray-300 bg-white px-4 py-3">
                   <input
                     type="checkbox"
                     checked={progressForm.adherence}
                     onChange={(event) =>
                       handleProgressFieldChange("adherence", event.target.checked)
                     }
-                    className="h-4 w-4 rounded border-white/20 bg-transparent"
+                    className="h-4 w-4 rounded border-gray-300 bg-transparent"
                   />
-                  <span className="text-sm text-gray-300">
+                  <span className="text-sm text-gray-700">
                     Patient followed the plan
                   </span>
                 </label>
               </div>
 
               <label className="space-y-2">
-                <span className="text-sm text-gray-300">Notes</span>
+                <span className="text-sm text-gray-700">Notes</span>
                 <textarea
                   value={progressForm.notes}
                   onChange={(event) =>
                     handleProgressFieldChange("notes", event.target.value)
                   }
                   rows={4}
-                  className="w-full rounded-xl border border-white/10 bg-gray-900/90 px-4 py-3 text-white focus:border-green-500/50 focus:outline-none"
+                  className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-gray-900 focus:border-green-500/50 focus:outline-none"
                   placeholder="Optional observations"
                 />
               </label>
@@ -1022,41 +1104,41 @@ function PatientDetails() {
               </button>
             </form>
 
-            <div className="space-y-4 rounded-2xl border border-white/10 bg-black/25 p-5">
+            <div className="space-y-4 rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-5">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-white">
+                <h3 className="text-lg font-semibold text-gray-900">
                   Recent Progress Logs
                 </h3>
-                <span className="text-sm text-gray-400">
+                <span className="text-sm text-gray-600">
                   {progressLogs.length} entries
                 </span>
               </div>
 
               {progressLoading ? (
-                <p className="text-sm text-gray-400">Loading progress logs...</p>
+                <p className="text-sm text-gray-600">Loading progress logs...</p>
               ) : progressLogs.length === 0 ? (
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-gray-600">
                   No progress logs recorded yet.
                 </p>
               ) : (
                 <div className="space-y-3">
-                  {progressLogs.map((log) => (
+                  {paginatedProgressLogs.map((log) => (
                     <div
                       key={log._id}
-                      className="rounded-xl border border-white/10 bg-white/[0.03] p-4"
+                      className="rounded-xl border-[2px] border-gray-300/60 bg-white p-4"
                     >
                       <div className="flex flex-wrap items-center justify-between gap-3">
-                        <p className="text-sm font-medium text-white">
+                        <p className="text-sm font-medium text-gray-900">
                           {new Date(log.createdAt).toLocaleDateString()}
                         </p>
-                        <p className="text-xs text-gray-400">
+                        <p className="text-xs text-gray-600">
                           {log.plan?.title
                             ? `Active Plan: ${log.plan.title}`
                             : "Active Plan"}
                         </p>
                       </div>
 
-                      <div className="mt-3 grid grid-cols-2 gap-3 text-sm text-gray-300">
+                      <div className="mt-3 grid grid-cols-2 gap-3 text-sm text-gray-700">
                         <p>Weight: {log.weight ?? "-"}</p>
                         <p>Energy: {log.energyLevel ?? "-"}/5</p>
                         <p>Digestion: {log.digestion || "-"}</p>
@@ -1071,10 +1153,43 @@ function PatientDetails() {
                       </div>
 
                       {log.notes && (
-                        <p className="mt-3 text-sm text-gray-400">{log.notes}</p>
+                        <p className="mt-3 text-sm text-gray-600">{log.notes}</p>
                       )}
                     </div>
                   ))}
+
+                  <div className="mt-4 border-t border-gray-200 pt-3">
+                    <div className="flex items-center justify-center gap-6 sm:gap-10">
+                      <button
+                        type="button"
+                        onClick={() => setProgressPage((p) => Math.max(p - 1, 1))}
+                        disabled={progressPage === 1 || progressLogs.length === 0}
+                        className="rounded border border-gray-300 bg-white px-3 py-1 text-xs text-gray-700 disabled:opacity-50"
+                      >
+                        Prev
+                      </button>
+
+                      {progressLogs.length > 0 && (
+                        <p className="text-xs text-gray-600">
+                          Showing {progressStartIndex + 1}-{progressEndIndex} of{" "}
+                          {progressLogs.length}
+                        </p>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setProgressPage((p) => Math.min(p + 1, totalProgressPages))
+                        }
+                        disabled={
+                          progressPage === totalProgressPages || progressLogs.length === 0
+                        }
+                        className="rounded border border-gray-300 bg-white px-3 py-1 text-xs text-gray-700 disabled:opacity-50"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -1089,7 +1204,7 @@ export default PatientDetails;
 
 function MealsList({ meals = [] }) {
   if (!meals.length) {
-    return <p className="text-sm text-gray-400">No meals added.</p>;
+    return <p className="text-sm text-gray-600">No meals added.</p>;
   }
 
   return (
@@ -1097,9 +1212,9 @@ function MealsList({ meals = [] }) {
       {meals.map((mealDay, index) => (
         <div
           key={`${mealDay.day}-${index}`}
-          className="rounded-2xl border border-white/10 bg-black/25 p-5 md:p-6"
+          className="rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-5 md:p-6"
         >
-          <h3 className="mb-4 text-lg font-semibold text-white">{mealDay.day}</h3>
+          <h3 className="mb-4 text-lg font-semibold text-gray-900">{mealDay.day}</h3>
           <div className="grid gap-3 md:grid-cols-3">
             <MealDisplay
               icon="Sunrise"
@@ -1123,19 +1238,19 @@ function PlanValidationCard({ validation }) {
   const { score, issues, suggestions } = validation;
   const badgeClasses =
     score < 5
-      ? "bg-red-500/20 text-red-200"
+      ? "bg-red-100 text-red-700"
       : score < 8
-        ? "bg-yellow-500/20 text-yellow-100"
-        : "bg-green-500/20 text-green-100";
+        ? "bg-yellow-100 text-yellow-700"
+        : "bg-green-100 text-green-700";
 
   return (
-    <div className="space-y-5 rounded-2xl border border-white/10 bg-black/20 p-5 md:p-6">
+    <div className="space-y-5 rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-5 md:p-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-sm uppercase tracking-[0.2em] text-gray-500">
             Validation
           </p>
-          <p className="mt-1 text-lg font-semibold text-white">Plan Quality</p>
+          <p className="mt-1 text-lg font-semibold text-gray-900">Plan Quality</p>
         </div>
         <div className={`rounded-full px-4 py-2 text-lg font-semibold ${badgeClasses}`}>
           Score: {score}/10
@@ -1143,37 +1258,37 @@ function PlanValidationCard({ validation }) {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <div className="space-y-2 rounded-xl border border-red-400/15 bg-red-500/5 p-4">
-          <p className="text-sm font-medium text-red-300">Warning Issues</p>
-          <p className="text-xs text-red-200/70">Review these items first</p>
+        <div className="space-y-2 rounded-xl border border-red-200 bg-red-50 p-4">
+          <p className="text-sm font-medium text-red-700">Warning Issues</p>
+          <p className="text-xs text-red-600">Review these items first</p>
           {issues.length ? (
             <div className="space-y-2">
               {issues.map((issue) => (
-                <p key={issue} className="text-sm text-red-100">
+                <p key={issue} className="text-sm text-red-700">
                   Warning {issue}
                 </p>
               ))}
             </div>
           ) : (
-            <p className="text-sm text-gray-400">No major issues detected.</p>
+            <p className="text-sm text-gray-600">No major issues detected.</p>
           )}
         </div>
 
-        <div className="space-y-2 rounded-xl border border-green-400/15 bg-green-500/5 p-4">
-          <p className="text-sm font-medium text-green-300">Helpful Suggestions</p>
-          <p className="text-xs text-green-200/70">
+        <div className="space-y-2 rounded-xl border border-green-200 bg-green-50 p-4">
+          <p className="text-sm font-medium text-green-700">Helpful Suggestions</p>
+          <p className="text-xs text-green-600">
             Simple ways to improve balance
           </p>
           {suggestions.length ? (
             <div className="space-y-2">
               {suggestions.map((suggestion) => (
-                <p key={suggestion} className="text-sm text-green-100">
+                <p key={suggestion} className="text-sm text-green-700">
                   Check {suggestion}
                 </p>
               ))}
             </div>
           ) : (
-            <p className="text-sm text-gray-400">This plan looks well balanced.</p>
+            <p className="text-sm text-gray-600">This plan looks well balanced.</p>
           )}
         </div>
       </div>
@@ -1183,11 +1298,11 @@ function PlanValidationCard({ validation }) {
 
 function ChangesMadeCard({ changes }) {
   return (
-    <div className="space-y-3 rounded-2xl border border-amber-400/15 bg-amber-500/10 p-5">
-      <p className="text-base font-semibold text-white">Changes made:</p>
+    <div className="space-y-3 rounded-2xl border border-amber-200 bg-amber-50 p-5">
+      <p className="text-base font-semibold text-gray-900">Changes made:</p>
       <div className="space-y-2">
         {changes.map((change) => (
-          <p key={change} className="text-sm text-amber-100">
+          <p key={change} className="text-sm text-amber-700">
             {change}
           </p>
         ))}
@@ -1198,13 +1313,13 @@ function ChangesMadeCard({ changes }) {
 
 function MealEditor({ icon, label, value, onChange }) {
   return (
-    <div className="space-y-3 rounded-xl border border-white/10 bg-white/[0.03] p-4">
+    <div className="space-y-3 rounded-xl border-[2px] border-gray-300/60 bg-white p-4">
       <div className="flex items-center gap-3">
-        <div className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-gray-200">
+        <div className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
           {icon}
         </div>
         <div>
-          <p className="text-sm font-medium text-white">{label}</p>
+          <p className="text-sm font-medium text-gray-900">{label}</p>
           <p className="text-xs text-gray-500">Add meal details</p>
         </div>
       </div>
@@ -1213,7 +1328,7 @@ function MealEditor({ icon, label, value, onChange }) {
         placeholder={label}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="min-h-28 w-full resize-none rounded-xl border border-white/10 bg-black/30 p-3 text-sm text-white placeholder:text-gray-500 focus:border-green-500/50 focus:outline-none"
+        className="min-h-28 w-full resize-none rounded-xl border border-gray-300 bg-white p-3 text-sm text-gray-900 placeholder:text-gray-500 focus:border-green-500/50 focus:outline-none"
       />
     </div>
   );
@@ -1221,25 +1336,25 @@ function MealEditor({ icon, label, value, onChange }) {
 
 function MealDisplay({ icon, label, value }) {
   return (
-    <div className="space-y-2 rounded-xl border border-white/10 bg-white/[0.03] p-4">
+    <div className="space-y-2 rounded-xl border-[2px] border-gray-300/60 bg-white p-4">
       <div className="flex items-center gap-3">
-        <div className="rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-gray-200">
+        <div className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
           {icon}
         </div>
-        <p className="text-sm font-medium text-white">{label}</p>
+        <p className="text-sm font-medium text-gray-900">{label}</p>
       </div>
-      <p className="text-sm leading-6 text-gray-300">{value || "-"}</p>
+      <p className="text-sm leading-6 text-gray-700">{value || "-"}</p>
     </div>
   );
 }
 
 function TrendCard({ label, arrow, value }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+    <div className="rounded-xl border-[2px] border-gray-300/60 bg-white p-4">
       <p className="text-xs uppercase tracking-[0.18em] text-gray-500">{label}</p>
       <div className="mt-3 flex items-center gap-3">
-        <span className="text-2xl font-semibold text-white">{arrow}</span>
-        <p className="text-base text-white/90">{value}</p>
+        <span className="text-2xl font-semibold text-gray-900">{arrow}</span>
+        <p className="text-base text-gray-800">{value}</p>
       </div>
     </div>
   );
@@ -1247,8 +1362,8 @@ function TrendCard({ label, arrow, value }) {
 
 function Section({ title, children }) {
   return (
-    <div className="space-y-4">
-      <h2 className="border-l-4 border-green-500 pl-3 text-xl font-semibold text-white">
+    <div className="space-y-4 rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-6 shadow-sm md:p-7">
+      <h2 className="border-l-4 border-green-500 pl-3 text-xl font-semibold text-gray-900">
         {title}
       </h2>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">{children}</div>
@@ -1258,9 +1373,11 @@ function Section({ title, children }) {
 
 function Info({ label, value }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-black/25 p-5">
+    <div className="rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-5 shadow-sm">
       <p className="text-xs uppercase tracking-[0.18em] text-gray-500">{label}</p>
-      <p className="mt-2 text-base text-white/90">{value}</p>
+      <p className="mt-2 text-base text-gray-900">{value}</p>
     </div>
   );
 }
+
+

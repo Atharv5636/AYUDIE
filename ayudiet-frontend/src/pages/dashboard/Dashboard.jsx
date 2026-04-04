@@ -1,13 +1,14 @@
-﻿import { useEffect, useMemo, useState } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
 import agendaFrame from "../../assets/agenda-botanical-frame.png";
+import lowAdherenceIcon from "../../assets/low-adherence-icon.png";
+import trendStableImage from "../../assets/trend-stable.png";
+import trendDecliningImage from "../../assets/trend-declining.png";
+import trendImprovingImage from "../../assets/trend-improving.png";
 
-import PatientsTable from "../../components/dashboard/PatientsTable";
 import PlansAwaitingReview from "../../components/dashboard/PlansAwaitingReview";
 import TodaysAgenda from "../../components/dashboard/TodaysAgenda";
 
-import { deletePatient } from "../../services/patient.service";
 import {
   approvePlan,
   fetchPendingPlans,
@@ -18,10 +19,80 @@ import { fetchJson } from "../../services/api";
 
 const AGENDA_STORAGE_KEY = "agenda";
 
-function Dashboard() {
-  const outletContext = useOutletContext();
-  const search = outletContext?.search || "";
+const ACTIVE_SEGMENTS_BY_DIGIT = {
+  0: ["a", "b", "c", "d", "e", "f"],
+  1: ["b", "c"],
+  2: ["a", "b", "g", "e", "d"],
+  3: ["a", "b", "g", "c", "d"],
+  4: ["f", "g", "b", "c"],
+  5: ["a", "f", "g", "c", "d"],
+  6: ["a", "f", "g", "e", "c", "d"],
+  7: ["a", "b", "c"],
+  8: ["a", "b", "c", "d", "e", "f", "g"],
+  9: ["a", "b", "c", "d", "f", "g"],
+};
 
+function SevenSegmentDigit({ digit }) {
+  const activeSegments = ACTIVE_SEGMENTS_BY_DIGIT[digit] || [];
+  const isOn = (segment) => activeSegments.includes(segment);
+
+  return (
+    <span className="relative inline-block h-16 w-9" aria-hidden="true">
+      <span
+        className={`absolute left-2 right-2 top-0 h-1.5 rounded-[2px] ${
+          isOn("a") ? "bg-gray-900" : "bg-gray-300/30"
+        }`}
+      />
+      <span
+        className={`absolute right-0 top-1 h-6 w-1.5 rounded-[2px] ${
+          isOn("b") ? "bg-gray-900" : "bg-gray-300/30"
+        }`}
+      />
+      <span
+        className={`absolute right-0 bottom-1 h-6 w-1.5 rounded-[2px] ${
+          isOn("c") ? "bg-gray-900" : "bg-gray-300/30"
+        }`}
+      />
+      <span
+        className={`absolute left-2 right-2 bottom-0 h-1.5 rounded-[2px] ${
+          isOn("d") ? "bg-gray-900" : "bg-gray-300/30"
+        }`}
+      />
+      <span
+        className={`absolute left-0 bottom-1 h-6 w-1.5 rounded-[2px] ${
+          isOn("e") ? "bg-gray-900" : "bg-gray-300/30"
+        }`}
+      />
+      <span
+        className={`absolute left-0 top-1 h-6 w-1.5 rounded-[2px] ${
+          isOn("f") ? "bg-gray-900" : "bg-gray-300/30"
+        }`}
+      />
+      <span
+        className={`absolute left-2 right-2 top-1/2 h-1.5 -translate-y-1/2 rounded-[2px] ${
+          isOn("g") ? "bg-gray-900" : "bg-gray-300/30"
+        }`}
+      />
+    </span>
+  );
+}
+
+function SevenSegmentNumber({ value }) {
+  const digits = String(value ?? 0)
+    .split("")
+    .filter((char) => /\d/.test(char))
+    .map((char) => Number(char));
+
+  return (
+    <div className="flex items-center justify-center gap-1" aria-label={`Count ${value}`}>
+      {digits.map((digit, index) => (
+        <SevenSegmentDigit key={`${digit}-${index}`} digit={digit} />
+      ))}
+    </div>
+  );
+}
+
+function Dashboard() {
   const [patients, setPatients] = useState([]);
   const [toast, setToast] = useState("");
   const [agenda, setAgenda] = useState(() => {
@@ -40,7 +111,9 @@ function Dashboard() {
   const [appliedPlans, setAppliedPlans] = useState({});
   const [loadingPlans, setLoadingPlans] = useState({});
   const [activePlanPage, setActivePlanPage] = useState(1);
+  const [criticalPatientPage, setCriticalPatientPage] = useState(1);
   const ACTIVE_PLANS_PER_PAGE = 3;
+  const CRITICAL_PATIENTS_PER_PAGE = 3;
 
   const filteredPlans = useMemo(() => {
     if (showMockData) return activePlans;
@@ -335,15 +408,6 @@ function Dashboard() {
     return "Duration unavailable";
   };
 
-  const filteredPatients = patients.filter((patient) =>
-    patient.name.toLowerCase().includes(search.toLowerCase())
-  );
-
-  const enrichedPatients = filteredPatients.map((patient) => ({
-    ...patient,
-    dashboardIntelligence: getPatientIntelligence(patient),
-  }));
-
   const plansWithScore = useMemo(() => {
     return filteredPlans.map((plan) => ({
       ...plan,
@@ -370,11 +434,26 @@ function Dashboard() {
     return issue.toLowerCase().includes("energy");
   }).length;
 
-  const criticalPatients = useMemo(() => {
-    return [...plansWithScore]
-      .sort((a, b) => b.attentionScore - a.attentionScore)
-      .slice(0, 3);
+  const sortedCriticalPatients = useMemo(() => {
+    return [...plansWithScore].sort((a, b) => b.attentionScore - a.attentionScore);
   }, [plansWithScore]);
+
+  const totalCriticalPatientPages = Math.max(
+    1,
+    Math.ceil(sortedCriticalPatients.length / CRITICAL_PATIENTS_PER_PAGE)
+  );
+
+  const paginatedCriticalPatients = useMemo(() => {
+    const start = (criticalPatientPage - 1) * CRITICAL_PATIENTS_PER_PAGE;
+    return sortedCriticalPatients.slice(start, start + CRITICAL_PATIENTS_PER_PAGE);
+  }, [sortedCriticalPatients, criticalPatientPage]);
+
+  const criticalPatientsStartIndex =
+    (criticalPatientPage - 1) * CRITICAL_PATIENTS_PER_PAGE;
+  const criticalPatientsEndIndex = Math.min(
+    criticalPatientsStartIndex + CRITICAL_PATIENTS_PER_PAGE,
+    sortedCriticalPatients.length
+  );
 
   const sortedActivePlans = useMemo(() => {
     return [...plansWithScore].sort(
@@ -400,7 +479,7 @@ function Dashboard() {
 
   console.log("CRITICAL DEBUG:", {
     total: plansWithScore.length,
-    selected: criticalPatients.length,
+    selected: paginatedCriticalPatients.length,
     scores: plansWithScore.map((p) => p.attentionScore),
   });
 
@@ -466,26 +545,6 @@ function Dashboard() {
       console.error(error);
       setPendingPlans(previousPendingPlans);
       throw error;
-    }
-  };
-
-  const handleDeletePatient = async (patientId) => {
-    if (!window.confirm("Are you sure?")) return;
-
-    try {
-      await deletePatient(patientId);
-      setPatients((prevPatients) =>
-        prevPatients.filter((patient) => patient._id !== patientId)
-      );
-      setActivePlans((prevPlans) =>
-        prevPlans.filter((plan) => {
-          const planPatientId =
-            typeof plan?.patient === "object" ? plan?.patient?._id : plan?.patient;
-          return planPatientId !== patientId;
-        })
-      );
-    } catch {
-      alert("Failed to delete patient");
     }
   };
 
@@ -587,6 +646,10 @@ function Dashboard() {
     setActivePlanPage(1);
   }, [sortedActivePlans.length]);
 
+  useEffect(() => {
+    setCriticalPatientPage(1);
+  }, [sortedCriticalPatients.length]);
+
   return (
     <>
       {toast && (
@@ -596,7 +659,7 @@ function Dashboard() {
       )}
 
       <div className="min-h-screen text-gray-900">
-        <div className="max-w-6xl mx-auto px-6 py-6 space-y-6">
+        <div className="w-full px-4 py-6 sm:px-6 lg:px-8 xl:px-10 2xl:px-12 space-y-6">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">
             Dashboard Overview
@@ -612,8 +675,8 @@ function Dashboard() {
           </button>
         </div>
 
-        <div className="grid gap-6 xl:grid-cols-[1.4fr_1fr]">
-          <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-6 xl:grid-cols-12">
+          <div className="grid gap-4 md:grid-cols-3 xl:col-span-8 2xl:col-span-9">
             {[
               {
                 title: "Patients Needing Attention",
@@ -639,7 +702,7 @@ function Dashboard() {
             ].map((card) => (
               <div
                 key={card.key}
-                className="relative overflow-hidden rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-5 shadow-sm"
+                className="relative flex min-h-[300px] flex-col overflow-hidden rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-5 shadow-sm"
               >
                 {card.key === "needs-attention" ? (
                   <div className="pointer-events-none absolute bottom-5 left-1/2 -translate-x-1/2">
@@ -647,21 +710,48 @@ function Dashboard() {
                   </div>
                 ) : card.key === "declining-plans" ? (
                   <div className="pointer-events-none absolute bottom-5 left-1/2 -translate-x-1/2">
-                    <ArrowDownRight className="h-24 w-24 text-amber-700/45 stroke-[1.5] drop-shadow-sm" />
+                    <svg
+                      viewBox="0 0 120 90"
+                      aria-hidden="true"
+                      className="h-24 w-28 text-gray-800/70 drop-shadow-sm"
+                      fill="none"
+                    >
+                      <path
+                        d="M8 12 45 48 63 30 102 69"
+                        stroke="currentColor"
+                        strokeWidth="8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <path
+                        d="M68 69h34V35"
+                        stroke="currentColor"
+                        strokeWidth="8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
                   </div>
                 ) : card.key === "low-adherence" ? (
                   <div className="pointer-events-none absolute bottom-5 left-1/2 -translate-x-1/2">
-                    <Minus className="h-24 w-24 text-orange-700/45 stroke-[1.5] drop-shadow-sm" />
+                    <img
+                      src={lowAdherenceIcon}
+                      alt="Low adherence icon"
+                      className="h-24 w-36 object-contain opacity-80 drop-shadow-sm"
+                    />
                   </div>
                 ) : null}
                 <p className="text-sm font-medium text-gray-800">{card.title}</p>
-                <p className="mt-2 text-3xl font-semibold text-gray-900">{card.value}</p>
-                <p className="mt-1 text-sm text-gray-700">{card.note}</p>
+
+                <div className="flex flex-1 flex-col items-center justify-center pb-20 text-center">
+                  <SevenSegmentNumber value={card.value} />
+                  <p className="mt-3 text-sm text-gray-700">{card.note}</p>
+                </div>
               </div>
             ))}
           </div>
 
-          <div className="rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-5 shadow-sm">
+          <div className="rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-5 shadow-sm xl:col-span-4 2xl:col-span-3">
             <div className="mb-4">
               <h2 className="text-lg font-semibold text-gray-900">Top Critical Patients</h2>
               <p className="mt-1 text-sm text-gray-600">
@@ -672,19 +762,19 @@ function Dashboard() {
             <div className="space-y-4">
               {plansWithScore.length === 0 ? (
                 <p className="text-sm text-gray-600">No data available</p>
-              ) : criticalPatients.length === 0 ? (
+              ) : paginatedCriticalPatients.length === 0 ? (
                 <p className="text-sm text-gray-600">No high-risk patients</p>
               ) : (
-                criticalPatients.map((plan) => (
+                paginatedCriticalPatients.map((plan) => (
                   <div
                     key={plan._id}
-                    className="rounded-lg border-[2px] border-gray-200 bg-[#FFFDF8] p-4 shadow-sm"
+                    className="rounded-lg border-[2px] border-gray-300/60 bg-[#FFFDF8] p-4 shadow-sm"
                   >
                     <p className="text-sm font-medium text-gray-900">
                       {plan.patient?.name || "Unknown"}
                     </p>
                     <p className="text-xs text-gray-600">
-                      {plan.analysis?.primaryIssue || "-"} • {plan.analysis?.trend || "-"}
+                      {plan.analysis?.primaryIssue || "-"} - {plan.analysis?.trend || "-"}
                     </p>
                     <p className="text-xs text-gray-600">
                       Priority: {plan.attentionScore}
@@ -693,32 +783,74 @@ function Dashboard() {
                 ))
               )}
             </div>
+
+            <div className="mt-4 border-t border-gray-200 pt-3">
+              <div className="flex items-center justify-center gap-6 sm:gap-10">
+                <button
+                  type="button"
+                  onClick={() => setCriticalPatientPage((p) => Math.max(p - 1, 1))}
+                  disabled={
+                    criticalPatientPage === 1 || sortedCriticalPatients.length === 0
+                  }
+                  className="rounded border border-gray-300 bg-white px-3 py-1 text-xs text-gray-700 disabled:opacity-50"
+                >
+                  Prev
+                </button>
+
+                {sortedCriticalPatients.length > 0 && (
+                  <p className="text-xs text-gray-600">
+                    Showing {criticalPatientsStartIndex + 1}-{criticalPatientsEndIndex} of{" "}
+                    {sortedCriticalPatients.length}
+                  </p>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCriticalPatientPage((p) =>
+                      Math.min(p + 1, totalCriticalPatientPages)
+                    )
+                  }
+                  disabled={
+                    criticalPatientPage === totalCriticalPatientPages ||
+                    sortedCriticalPatients.length === 0
+                  }
+                  className="rounded border border-gray-300 bg-white px-3 py-1 text-xs text-gray-700 disabled:opacity-50"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-        <div className="grid gap-6 xl:grid-cols-[1fr_1.2fr]">
-          <TodaysAgenda
-            agenda={agenda}
-            patients={patients}
-            nextAgendaId={nextAgendaId}
-            onAdd={handleAddAgenda}
-            onDelete={handleDeleteAgenda}
-          />
+        <div className="grid gap-6 xl:grid-cols-12">
+          <div className="xl:col-span-5">
+            <TodaysAgenda
+              agenda={agenda}
+              patients={patients}
+              nextAgendaId={nextAgendaId}
+              onAdd={handleAddAgenda}
+              onDelete={handleDeleteAgenda}
+            />
+          </div>
 
-          <PlansAwaitingReview
-            plans={pendingPlans}
-            onApproved={handleApprove}
-            onRejected={handleReject}
-            getPrimaryIssue={getPrimaryIssue}
-            getEffectivenessScore={getEffectivenessScore}
-            getTrendValue={getTrendValue}
-            getTrendDelta={getTrendDelta}
-            getReasonSummary={getReasonSummary}
-            getExpectedImpact={getExpectedImpact}
-            formatTrendLabel={formatTrendLabel}
-            getTrendMeta={getTrendMeta}
-            isImmediateAttention={isImmediateAttention}
-            formatPlanDuration={formatPlanDuration}
-          />
+          <div className="xl:col-span-7">
+            <PlansAwaitingReview
+              plans={pendingPlans}
+              onApproved={handleApprove}
+              onRejected={handleReject}
+              getPrimaryIssue={getPrimaryIssue}
+              getEffectivenessScore={getEffectivenessScore}
+              getTrendValue={getTrendValue}
+              getTrendDelta={getTrendDelta}
+              getReasonSummary={getReasonSummary}
+              getExpectedImpact={getExpectedImpact}
+              formatTrendLabel={formatTrendLabel}
+              getTrendMeta={getTrendMeta}
+              isImmediateAttention={isImmediateAttention}
+              formatPlanDuration={formatPlanDuration}
+            />
+          </div>
         </div>
 
         <div className="border-t border-gray-200 pt-4 space-y-4">
@@ -761,6 +893,36 @@ function Dashboard() {
                 const hasChartPoints =
                   typeof chartPrevious === "number" &&
                   typeof chartCurrent === "number";
+                const chartUnit = reasonTrend?.unit || "";
+                const formatChartValue = (value) =>
+                  typeof value === "number"
+                    ? Number.isInteger(value)
+                      ? value
+                      : value.toFixed(1)
+                    : "-";
+                const chartChangeLabel = hasChartPoints
+                  ? `${formatChartValue(chartPrevious)}${chartUnit} -> ${formatChartValue(chartCurrent)}${chartUnit}`
+                  : "-";
+                const chartMeta = (() => {
+                  if (!hasChartPoints) return null;
+
+                  const minValue = Math.min(chartPrevious, chartCurrent);
+                  const maxValue = Math.max(chartPrevious, chartCurrent);
+                  const spread = maxValue - minValue || 1;
+                  const topY = 10;
+                  const graphHeight = 28;
+                  const startX = 12;
+                  const endX = 108;
+                  const toY = (value) =>
+                    topY + graphHeight - ((value - minValue) / spread) * graphHeight;
+
+                  return {
+                    startX,
+                    endX,
+                    y1: toY(chartPrevious),
+                    y2: toY(chartCurrent),
+                  };
+                })();
                 const normalizedTrend = String(trend).toLowerCase();
                 const trendDirection =
                   normalizedTrend.includes("declin")
@@ -768,6 +930,12 @@ function Dashboard() {
                     : normalizedTrend.includes("improv")
                       ? "improving"
                       : "stable";
+                const trendGraphImage =
+                  trendDirection === "declining"
+                    ? trendDecliningImage
+                    : trendDirection === "improving"
+                      ? trendImprovingImage
+                      : trendStableImage;
                 const patientName = plan.patient?.name || "Unknown Patient";
                 const patientAge =
                   plan?.patient?.age ??
@@ -811,7 +979,7 @@ function Dashboard() {
                                 {patientName}
                               </p>
                               <p className="text-xs text-gray-400">
-                                Age: {patientAge ?? "—"}
+                                Age: {patientAge ?? "-"}
                               </p>
                             </div>
                             <span className="inline-flex rounded-full bg-gray-200 px-2.5 py-1 text-xs font-medium text-gray-700">
@@ -825,18 +993,18 @@ function Dashboard() {
                             </span>
                           </div>
                           <p className="text-xs text-gray-400">
-                            Last updated {timeLabel || "—"}
+                            Last updated {timeLabel || "-"}
                           </p>
                         </div>
 
-                        <div className="rounded-lg bg-[#FFFDF8] px-4 py-3 shadow-sm space-y-1.5">
+                        <div className="rounded-lg border-[2px] border-gray-300/60 bg-[#FFFDF8] px-4 py-3 shadow-sm space-y-1.5">
                           <p className="text-xs uppercase tracking-wide text-gray-400">
                             Adherence Score
                           </p>
                           <p className="mt-1 text-[34px] font-bold tracking-tight leading-tight text-gray-900">
-                            {hasScoreData ? `${numericScore}%` : "—"}
+                            {hasScoreData ? `${numericScore}%` : "-"}
                           </p>
-                          <p className="text-sm text-gray-600">{scoreCategory || "—"}</p>
+                          <p className="text-sm text-gray-600">{scoreCategory || "-"}</p>
                         </div>
 
                         <div className="space-y-1.5">
@@ -844,7 +1012,7 @@ function Dashboard() {
                           <p className="text-sm text-gray-600">
                             {primaryIssue && primaryIssue !== "Not enough data"
                               ? primaryIssue
-                              : "—"}
+                              : "-"}
                           </p>
                         </div>
 
@@ -856,7 +1024,7 @@ function Dashboard() {
                             {adjustments.length > 0 ? (
                               adjustments.map((item, index) => <li key={index}>{item}</li>)
                             ) : (
-                              <li>—</li>
+                              <li>-</li>
                             )}
                           </ul>
                         </div>
@@ -908,20 +1076,25 @@ function Dashboard() {
                       </div>
 
                       <div className="col-span-1">
-                        <div className="min-h-full rounded-lg bg-[#FFFDF8] p-3 shadow-sm space-y-4 flex flex-col justify-between">
+                        <div className="min-h-full rounded-lg border-[2px] border-gray-300/60 bg-[#FFFDF8] p-3 shadow-sm space-y-4 flex flex-col justify-between">
                           <div className="space-y-1.5">
                             <p className="text-xs uppercase tracking-wide text-gray-400">Trend</p>
                             <p className="text-sm capitalize text-gray-600">
-                              {trend === "-" ? "—" : trendDirection}
+                              {trend === "-" ? "-" : trendDirection}
                             </p>
                           </div>
+
+                          <div className="flex h-24 items-center justify-center overflow-hidden rounded-md border border-gray-200 bg-white p-1">
+                            <img
+                              src={trendGraphImage}
+                              alt={`${trendDirection} trend graph`}
+                              className="h-full w-full scale-[1.65] object-contain"
+                            />
+                          </div>
+
                           <div className="space-y-1.5">
                             <p className="text-xs tracking-wide text-gray-400">Change</p>
-                            <p className="text-sm text-gray-600">
-                              {hasChartPoints
-                                ? `${chartPrevious}${reasonTrend?.unit || ""} ? ${chartCurrent}${reasonTrend?.unit || ""}`
-                                : "—"}
-                            </p>
+                            <p className="text-sm text-gray-600">{chartChangeLabel}</p>
                           </div>
                         </div>
                       </div>
@@ -966,14 +1139,6 @@ function Dashboard() {
             </div>
           )}
         </div>
-
-        <PatientsTable
-          patients={enrichedPatients}
-          onDelete={handleDeletePatient}
-          formatTrendLabel={formatTrendLabel}
-          getTrendTone={getTrendTone}
-          getTrendMeta={getTrendMeta}
-        />
 
         {message && <p className="text-red-400">{message}</p>}
       </div>
@@ -1070,6 +1235,11 @@ function Dashboard() {
 }
 
 export default Dashboard;
+
+
+
+
+
 
 
 

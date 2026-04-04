@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import agendaFrame from "../../assets/agenda-botanical-frame.png";
 
@@ -36,6 +36,25 @@ function TodaysAgenda({
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(initialForm);
   const [error, setError] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 3;
+
+  const totalPages = Math.max(1, Math.ceil((agenda?.length || 0) / ITEMS_PER_PAGE));
+
+  const paginatedAgenda = useMemo(() => {
+    const list = agenda || [];
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return list.slice(start, start + ITEMS_PER_PAGE);
+  }, [agenda, currentPage]);
+
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, agenda?.length || 0);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -75,7 +94,7 @@ function TodaysAgenda({
 
   return (
     <div
-      className="overflow-hidden rounded-2xl border-[2px] border-black p-6 shadow-sm"
+      className="flex h-full flex-col overflow-hidden rounded-2xl border-[2px] border-black p-6 shadow-sm"
       style={{
         backgroundImage: `url(${agendaFrame})`,
         backgroundSize: "cover",
@@ -188,14 +207,14 @@ function TodaysAgenda({
         </form>
       )}
 
-      <div className="space-y-4">
+      <div className="flex-1 space-y-4">
         {agenda.length === 0 ? (
           <div className="rounded-lg border-[2px] border-dashed border-gray-300 px-4 py-6 text-sm text-gray-600">
             No agenda items yet. Add one to schedule the next patient interaction.
           </div>
         ) : null}
 
-        {agenda.map((item) => (
+        {paginatedAgenda.map((item) => (
           <div
             key={item.id}
             className="rounded-lg border-[2px] border-gray-200 bg-[#FFFDF8] p-4 shadow-sm"
@@ -250,6 +269,34 @@ function TodaysAgenda({
           </div>
         ))}
       </div>
+
+      {agenda.length > 0 && (
+        <div className="mt-4 rounded-lg border border-gray-300/70 bg-white/90 px-3 pt-3 shadow-sm backdrop-blur-[1px]">
+          <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3 pb-3">
+            <button
+              type="button"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+              className="h-8 min-w-[72px] rounded border border-gray-400 bg-white px-2 text-sm font-semibold text-gray-800 shadow-sm disabled:cursor-not-allowed disabled:border-gray-300 disabled:bg-gray-100 disabled:text-gray-500"
+            >
+              Prev
+            </button>
+
+            <p className="text-center text-xs font-medium text-gray-700 sm:text-sm">
+              Showing {startIndex + 1}-{endIndex} of {agenda.length}
+            </p>
+
+            <button
+              type="button"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className="h-8 min-w-[72px] rounded border border-gray-400 bg-white px-2 text-sm font-semibold text-gray-800 shadow-sm disabled:cursor-not-allowed disabled:border-gray-300 disabled:bg-gray-100 disabled:text-gray-500"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 function PlansAwaitingReview({
   plans = [],
@@ -16,6 +16,23 @@ function PlansAwaitingReview({
   formatPlanDuration,
 }) {
   const [loadingId, setLoadingId] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 2;
+
+  const totalPages = Math.max(1, Math.ceil((plans?.length || 0) / ITEMS_PER_PAGE));
+
+  const paginatedPlans = useMemo(() => {
+    const list = plans || [];
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return list.slice(start, start + ITEMS_PER_PAGE);
+  }, [plans, currentPage]);
+
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, plans?.length || 0);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [plans]);
 
   const handleApprove = async (plan) => {
     try {
@@ -48,7 +65,7 @@ function PlansAwaitingReview({
 
   if (plans.length === 0) {
     return (
-      <div className="rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-6 shadow-sm">
+      <div className="flex h-full flex-col rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-6 shadow-sm">
         <h2 className="mb-2 text-lg font-semibold text-gray-900">Pending Plans</h2>
         <p className="text-sm text-gray-600">No plans pending review</p>
       </div>
@@ -57,7 +74,7 @@ function PlansAwaitingReview({
 
   return (
     <>
-      <div className="rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-6 shadow-sm">
+      <div className="flex h-full flex-col rounded-2xl border-[2px] border-gray-300/60 bg-[#FFFDF8] p-6 shadow-sm">
         <div className="mb-4">
           <h2 className="text-lg font-semibold text-gray-900">Pending Plans</h2>
           <p className="mt-1 text-sm text-gray-600">
@@ -65,8 +82,8 @@ function PlansAwaitingReview({
           </p>
         </div>
 
-        <div className="space-y-4">
-          {plans.map((plan) => {
+        <div className="flex-1 space-y-4">
+          {paginatedPlans.map((plan) => {
             const primaryIssue = getPrimaryIssue?.(plan) || "none";
             const trend = getTrendValue?.(plan) || "stable";
             const trendMeta = getTrendMeta?.(trend);
@@ -80,36 +97,15 @@ function PlansAwaitingReview({
             return (
               <div
                 key={plan._id}
-                className="rounded-lg border-[2px] border-gray-200 bg-[#FFFDF8] p-4"
+                className="rounded-lg border-[2px] border-gray-300/60 bg-[#FFFDF8] p-5 shadow-sm"
               >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="font-medium text-gray-900">{patientName}</p>
-                    <p className="mt-1 text-sm text-gray-500">{plan.title}</p>
-                  </div>
-
-                  <span className="rounded-full bg-blue-100 px-2.5 py-1 text-[11px] font-medium text-blue-600">
-                    {formatPlanDuration?.(plan)}
-                  </span>
-                </div>
-
-                <div className="mt-4 grid gap-3 text-sm md:grid-cols-3">
-                  <div>
-                    <p className="text-gray-500">Plan Duration</p>
-                    <p className="mt-1 text-gray-900">{formatPlanDuration?.(plan)}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500">Primary Issue</p>
-                    <p className="mt-1 capitalize text-gray-900">{primaryIssue}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-500">Trend</p>
-                    <div className="mt-1 inline-flex items-center gap-2 text-gray-900">
-                      {TrendIcon ? <TrendIcon className="h-4 w-4" /> : null}
-                      <span>{formatTrendLabel?.(trend) || trend}</span>
-                    </div>
-                    <p className="mt-1 text-xs text-gray-500">{trendDelta}</p>
-                  </div>
+                <div>
+                  <p className="text-2xl font-medium text-gray-900">{patientName}</p>
+                  <p className="mt-1 text-sm text-gray-600">
+                    {primaryIssue} • {formatTrendLabel?.(trend) || trend}
+                  </p>
+                  <p className="text-sm text-gray-600">Duration: {formatPlanDuration?.(plan)}</p>
+                  <p className="text-xs text-gray-500">{trendDelta}</p>
                 </div>
 
                 <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -139,10 +135,39 @@ function PlansAwaitingReview({
             );
           })}
         </div>
+
+        <div className="mt-4 border-t border-gray-200 pt-3">
+          <div className="flex items-center justify-center gap-6 sm:gap-10">
+            <button
+              type="button"
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1 || !plans || plans.length === 0}
+              className="rounded border border-gray-300 bg-white px-3 py-1 text-xs text-gray-700 disabled:opacity-50"
+            >
+              Prev
+            </button>
+
+            {plans && plans.length > 0 && (
+              <p className="text-xs text-gray-600">
+                Showing {startIndex + 1}-{endIndex} of {plans.length}
+              </p>
+            )}
+
+            <button
+              type="button"
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages || !plans || plans.length === 0}
+              className="rounded border border-gray-300 bg-white px-3 py-1 text-xs text-gray-700 disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+        </div>
       </div>
     </>
   );
 }
 
 export default PlansAwaitingReview;
+
 

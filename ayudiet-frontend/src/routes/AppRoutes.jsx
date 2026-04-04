@@ -9,6 +9,7 @@ import DashboardLayout from "../components/layout/DashboardLayout";
 
 import Dashboard from "../pages/dashboard/Dashboard";
 import Patients from "../pages/dashboard/Patients";
+import PatientsTablePage from "../pages/dashboard/PatientsTablePage";
 import AddPatient from "../pages/dashboard/AddPatient";
 import PatientDetails from "../pages/dashboard/PatientDetails";
 import EditPatient from "../pages/dashboard/EditPatient";
@@ -26,6 +27,7 @@ function AppRoutes() {
         <Route path="/dashboard" element={<DashboardLayout />}>
           <Route index element={<Dashboard />} />
           <Route path="patients" element={<Patients />} />
+          <Route path="patients-table" element={<PatientsTablePage />} />
           <Route path="add-patient" element={<AddPatient />} />
           <Route path="patients/:id" element={<PatientDetails />} />
           <Route path="patients/:id/edit" element={<EditPatient />} />

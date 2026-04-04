@@ -1,6 +1,7 @@
+import { Menu, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-function Topbar({ search, setSearch }) {
+function Topbar({ search, setSearch, isSidebarOpen, onToggleSidebar }) {
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -10,13 +11,22 @@ function Topbar({ search, setSearch }) {
 
   return (
     <header
-      className="h-16 px-6 flex items-center justify-between
-      bg-white border-b border-gray-300"
+      className="sticky top-0 z-40 h-16 px-6 flex items-center justify-between
+      bg-white/95 border-b border-gray-300 backdrop-blur"
     >
       {/* LEFT */}
-      <h1 className="text-sm text-gray-700">
-        Welcome back, Doctor 
-      </h1>
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          aria-label={isSidebarOpen ? "Close menu" : "Open menu"}
+          onClick={onToggleSidebar}
+          className="rounded-md border border-gray-300 bg-white p-2 text-gray-700 transition hover:bg-gray-100"
+        >
+          {isSidebarOpen ? <X size={18} /> : <Menu size={18} />}
+        </button>
+
+        <h1 className="text-sm text-gray-700">Welcome back, Doctor</h1>
+      </div>
 
       {/* CENTER: SEARCH */}
       <input

@@ -1,8 +1,8 @@
-import { LayoutDashboard, Users, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, Table2, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import logo from "../../assets/logo.png";
+import logo from "../../assets/sidebar-logo.png";
 
-function Sidebar() {
+function Sidebar({ isOpen, onClose }) {
   const navigate = useNavigate();
 
   const logout = () => {
@@ -11,7 +11,21 @@ function Sidebar() {
   };
 
   return (
-    <aside className="w-64 border-r border-gray-300 bg-white p-4 text-gray-900">
+    <>
+      {isOpen && (
+        <button
+          type="button"
+          aria-label="Close sidebar backdrop"
+          onClick={onClose}
+          className="fixed inset-0 z-20 bg-black/30 lg:hidden"
+        />
+      )}
+
+      <aside
+        className={`fixed inset-y-0 left-0 z-30 w-64 border-r border-gray-300 bg-white p-4 text-gray-900 shadow-sm transition-transform duration-300 ease-out ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
         {/* Logo Section */}
         <div className="mb-6 flex items-center gap-3">
           <img
@@ -24,7 +38,10 @@ function Sidebar() {
 
         <nav className="space-y-2">
           <button
-            onClick={() => navigate("/dashboard")}
+            onClick={() => {
+              navigate("/dashboard");
+              onClose();
+            }}
             className="flex w-full items-center gap-2 rounded p-2 hover:bg-gray-100"
           >
             <LayoutDashboard size={18} />
@@ -32,11 +49,25 @@ function Sidebar() {
           </button>
 
           <button
-            onClick={() => navigate("/dashboard/patients")}
+            onClick={() => {
+              navigate("/dashboard/patients");
+              onClose();
+            }}
             className="flex w-full items-center gap-2 rounded p-2 hover:bg-gray-100"
           >
             <Users size={18} />
             Patients
+          </button>
+
+          <button
+            onClick={() => {
+              navigate("/dashboard/patients-table");
+              onClose();
+            }}
+            className="flex w-full items-center gap-2 rounded p-2 hover:bg-gray-100"
+          >
+            <Table2 size={18} />
+            Patients Table
           </button>
 
           <button
@@ -47,7 +78,8 @@ function Sidebar() {
             Logout
           </button>
         </nav>
-    </aside>
+      </aside>
+    </>
   );
 }
 

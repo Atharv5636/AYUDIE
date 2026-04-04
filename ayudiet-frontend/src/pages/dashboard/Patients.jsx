@@ -46,9 +46,11 @@ function Patients() {
                 }}
               >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="font-semibold text-gray-900">{p.name}</p>
-                    <p className="text-sm text-gray-600">Age: {p.age}</p>
+                  <div className="rounded-lg bg-white/90 px-3 py-2 shadow-sm">
+                    <p className="inline-block rounded-md bg-yellow-300 px-2.5 py-0.5 text-lg font-semibold text-gray-900">
+                      {p.name}
+                    </p>
+                    <p className="mt-1 text-sm text-gray-800">Age: {p.age}</p>
                   </div>
 
                   <div className="inline-flex items-center gap-2 self-start sm:self-center">
