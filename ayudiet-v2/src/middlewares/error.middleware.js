@@ -3,24 +3,25 @@
 // because it has 4 parameters: (err, req, res, next)
 
 const errorHandler = (err, req, res, next) => {
-  // Log the error in the server console
-  // This helps the developer debug the issue
-  // (We do NOT show full error details to the client)
-  console.error(err);
+  // Log full error server-side for diagnosis.
+  console.error(`[ERROR] ${req.method} ${req.originalUrl}`, err);
 
   // If the error has a statusCode (custom error like ApiError),
   // use it. Otherwise, default to 500 (Internal Server Error)
   const statusCode = err.statusCode || err.status || 500;
 
-  // If the error has a message, use it.
-  // Otherwise, send a safe generic message
-  const message = err.message || "Internal Server Error";
+  const isProduction = process.env.NODE_ENV === "production";
+  const isOperational = statusCode < 500;
+  const message =
+    isOperational || !isProduction
+      ? err.message || "Internal Server Error"
+      : "Internal Server Error";
 
   // Send a clean JSON response to the client
   // Frontend can easily handle this format
   res.status(statusCode).json({
-    success: false,   // indicates API failure
-    message,          // error message to show
+    success: false,
+    message,
   });
 };
 

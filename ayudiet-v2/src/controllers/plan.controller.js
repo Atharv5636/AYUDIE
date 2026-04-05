@@ -8,6 +8,12 @@ const {
   modifyPlanBasedOnProgress,
 } = require("../services/adaptivePlanService");
 const foods = require("../data/foods.json");
+const debugLogsEnabled = process.env.DEBUG_LOGS === "true";
+const debugLog = (...args) => {
+  if (debugLogsEnabled) {
+    console.log(...args);
+  }
+};
 
 const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value);
 
@@ -477,7 +483,7 @@ const ensureAnalysisInResponse = (plan) => {
 };
 
 const logOutgoingPlan = (plan) => {
-  console.log("Sending plan:", plan);
+  debugLog("Sending plan:", plan);
 };
 
 const isValidAnalysisCache = (analysis) =>
@@ -540,7 +546,7 @@ const computeAndPersistPlanAnalysis = async (plan) => {
     return normalizedPlan;
   }
 
-  console.log("Computing new analysis");
+  debugLog("Computing new analysis");
   const analysisResult = await modifyPlanBasedOnProgress(patientId);
   const analysisWithTimestamp = {
     ...(analysisResult?.analysis || {}),
@@ -549,7 +555,7 @@ const computeAndPersistPlanAnalysis = async (plan) => {
 
   normalizedPlan.analysis = analysisWithTimestamp;
   await persistPlanAnalysis(normalizedPlan._id, analysisWithTimestamp);
-  console.log("Sending plan analysis:", normalizedPlan.analysis);
+  debugLog("Sending plan analysis:", normalizedPlan.analysis);
 
   return normalizedPlan;
 };
@@ -570,8 +576,8 @@ const attachAnalysisToPlan = async (
     isValidAnalysisCache(normalizedPlan.analysis) &&
     !isAnalysisStale(normalizedPlan.analysis)
   ) {
-    console.log("Using cached analysis");
-    console.log("Sending plan analysis:", normalizedPlan.analysis);
+    debugLog("Using cached analysis");
+    debugLog("Sending plan analysis:", normalizedPlan.analysis);
     return normalizedPlan;
   }
 
@@ -581,12 +587,12 @@ const attachAnalysisToPlan = async (
     (!isValidAnalysisCache(normalizedPlan.analysis) ||
       isAnalysisStale(normalizedPlan.analysis))
   ) {
-    console.log("Computing new analysis");
+    debugLog("Computing new analysis");
     try {
       return await computeAndPersistPlanAnalysis(normalizedPlan);
     } catch (error) {
       normalizedPlan.analysis = normalizedPlan.analysis || null;
-      console.log("Sending plan analysis:", normalizedPlan.analysis);
+      debugLog("Sending plan analysis:", normalizedPlan.analysis);
       return normalizedPlan;
     }
   }
@@ -595,7 +601,7 @@ const attachAnalysisToPlan = async (
     return await computeAndPersistPlanAnalysis(normalizedPlan);
   } catch (error) {
     normalizedPlan.analysis = normalizedPlan.analysis || null;
-    console.log("Sending plan analysis:", normalizedPlan.analysis);
+    debugLog("Sending plan analysis:", normalizedPlan.analysis);
     return normalizedPlan;
   }
 };

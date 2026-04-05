@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const Doctor = require("../models/doctor.model");
 const ApiError = require("../utils/ApiError");
+const jwt = require("jsonwebtoken");
 
 // SIGNUP CONTROLLER
 const signup = async (req, res, next) => {
@@ -43,12 +44,14 @@ const signup = async (req, res, next) => {
   }
 };
 
-const jwt = require("jsonwebtoken");
-const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret";
-
 // LOGIN CONTROLLER
 const login = async (req, res, next) => {
   try {
+    const JWT_SECRET = process.env.JWT_SECRET;
+    if (!JWT_SECRET) {
+      return next(new ApiError(500, "Server misconfiguration: JWT secret missing"));
+    }
+
     const { email, password } = req.body;
 
     // 1. Validate input
@@ -78,6 +81,10 @@ const login = async (req, res, next) => {
       JWT_SECRET,
       { expiresIn: "7d" }
     );
+
+    if (process.env.DEBUG_LOGS === "true") {
+      console.log(`[AUTH] Login success for ${doctor.email}`);
+    }
 
     // 5. Send success response
     res.status(200).json({

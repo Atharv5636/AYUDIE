@@ -28,7 +28,7 @@ router.post("/fix-ai", fixAiPlan);
 router.post("/strict/profile", strictProfileProxy);
 router.post("/strict/explain", strictExplainProxy);
 router.post("/", createPlan);
-router.put("/:id", authMiddleware, updatePlan);
+router.put("/:id", updatePlan);
 router.patch("/:id/approve", approvePlan);
 router.patch("/:id/reject", rejectPlan);
 router.patch("/:id/apply-adjustments", applyPlanAdjustments);

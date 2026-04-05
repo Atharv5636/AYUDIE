@@ -1,16 +1,12 @@
-const ApiError = require("../utils/ApiError");
+const mongoose = require("mongoose");
 const Patient = require("../models/patient.model");
 
-const healthCheck = (req, res, next) => {
-  const token = req.query.token;
-
-  if (!token) {
-    return next(new ApiError(400, "Token is required"));
-  }
-
+const healthCheck = (req, res) => {
   res.status(200).json({
     success: true,
     message: "Ayudiet backend is healthy",
+    dbState: mongoose.connection.readyState,
+    timestamp: new Date().toISOString(),
   });
 };
 

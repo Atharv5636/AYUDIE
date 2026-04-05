@@ -4,6 +4,12 @@ const Patient = require("../models/patient.model");
 const Plan = require("../models/plan.model");
 const ApiError = require("../utils/ApiError");
 const { modifyPlanBasedOnProgress } = require("../services/adaptivePlanService");
+const debugLogsEnabled = process.env.DEBUG_LOGS === "true";
+const debugLog = (...args) => {
+  if (debugLogsEnabled) {
+    console.log(...args);
+  }
+};
 
 const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value);
 const normalizeAdherenceScore = (value) => {
@@ -74,15 +80,15 @@ const createProgressLog = async (req, res, next) => {
     const plan = await Plan.findOne({ patient: patientId, isActive: true });
 
     if (!plan) {
-      console.log("No active plan found for patient:", patientId);
+      debugLog("No active plan found for patient:", patientId);
     } else if (!result || !result.analysis) {
-      console.log("No analysis computed for patient:", patientId);
+      debugLog("No analysis computed for patient:", patientId);
     } else {
-      console.log("Analysis result:", result);
+      debugLog("Analysis result:", result);
       plan.analysis = result.analysis;
       plan.analysis.computedAt = new Date();
       await plan.save();
-      console.log("Updated analysis saved to plan:", plan.analysis);
+      debugLog("Updated analysis saved to plan:", plan.analysis);
     }
 
     res.status(201).json({

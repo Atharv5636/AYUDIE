@@ -4,6 +4,12 @@ const ApiError = require("../utils/ApiError");
 const Patient = require("../models/patient.model");
 const Plan = require("../models/plan.model");
 const ProgressLog = require("../models/progressLog.model");
+const debugLogsEnabled = process.env.DEBUG_LOGS === "true";
+const debugLog = (...args) => {
+  if (debugLogsEnabled) {
+    console.log(...args);
+  }
+};
 
 const MAX_LOGS = 5;
 const MIN_LOGS = 3;
@@ -1182,8 +1188,8 @@ const modifyPlanBasedOnProgress = async (patientId) => {
   const weightSignal =
     isImproving ? "Positive" : isDeclining ? "Negative" : "Neutral";
 
-  console.log("=== DEBUG ANALYSIS ===");
-  console.log({
+  debugLog("=== DEBUG ANALYSIS ===");
+  debugLog({
     patientId: String(patientId),
     avgAdherence,
     avgEnergy,
@@ -1199,11 +1205,11 @@ const modifyPlanBasedOnProgress = async (patientId) => {
     isCorrect,
   });
   if (!isCorrect) {
-    console.error("❌ TREND MISMATCH DETECTED");
+    debugLog("Trend mismatch detected");
   } else {
-    console.log("✅ Trend logic correct");
+    debugLog("Trend logic correct");
   }
-  console.log("======================");
+  debugLog("======================");
 
   let primaryIssue = "-";
   if (avgAdherence < 60) {

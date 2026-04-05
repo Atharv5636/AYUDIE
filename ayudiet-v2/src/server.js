@@ -6,19 +6,27 @@ const connectDB = require("./config/db");
 const PORT = process.env.PORT || 3000;
 
 const validateEnv = () => {
-  if (!process.env.MONGO_URI) {
-    console.error("MONGO_URI missing in env");
-    process.exit(1);
+  const required = ["MONGO_URI", "JWT_SECRET"];
+  const missing = required.filter((key) => !process.env[key]);
+
+  if (missing.length > 0) {
+    throw new Error(`Missing required environment variables: ${missing.join(", ")}`);
   }
 
-  if (!process.env.JWT_SECRET) {
-    throw new Error("Missing JWT_SECRET. Add it to the backend .env file.");
+  if (
+    process.env.NODE_ENV === "production" &&
+    !process.env.CORS_ORIGIN &&
+    !process.env.FRONTEND_ORIGIN
+  ) {
+    throw new Error("Set CORS_ORIGIN (or FRONTEND_ORIGIN) in production");
   }
 };
 
 const startServer = async () => {
   try {
     console.log("Starting backend startup sequence...");
+    console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
+    console.log(`Port: ${PORT}`);
     validateEnv();
     console.log("Calling connectDB()...");
     await connectDB();
@@ -32,5 +40,13 @@ const startServer = async () => {
     process.exit(1);
   }
 };
+
+process.on("unhandledRejection", (reason) => {
+  console.error("Unhandled Rejection:", reason);
+});
+
+process.on("uncaughtException", (error) => {
+  console.error("Uncaught Exception:", error);
+});
 
 startServer();
