@@ -1,27 +1,34 @@
 const mongoose = require("mongoose");
 
-const MONGO_URI = "mongodb://127.0.0.1:27017/ayudiet";
-
 let eventsRegistered = false;
 
 const connectDB = async () => {
   try {
+    if (!process.env.MONGO_URI) {
+      throw new Error("Missing MONGO_URI. Add it to your .env file.");
+    }
+
     if (!eventsRegistered) {
       mongoose.connection.on("connected", () => {
-        console.log("MongoDB connected successfully");
+        console.log("Mongoose connected");
       });
 
-      mongoose.connection.on("error", (error) => {
-        console.error("MongoDB connection error:", error.message);
+      mongoose.connection.on("error", (err) => {
+        console.log("Mongoose error:", err);
+      });
+
+      mongoose.connection.on("disconnected", () => {
+        console.log("Mongoose disconnected");
       });
 
       eventsRegistered = true;
     }
 
     console.log("Connecting to MongoDB...");
-    await mongoose.connect(MONGO_URI);
+    const conn = await mongoose.connect(process.env.MONGO_URI);
+    console.log(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
-    console.error("MongoDB connection failed", error.message);
+    console.error("DB Connection Error:", error.message);
     process.exit(1);
   }
 };
