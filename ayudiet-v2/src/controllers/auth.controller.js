@@ -7,14 +7,16 @@ const jwt = require("jsonwebtoken");
 const signup = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
+    const normalizedName = String(name || "").trim();
+    const normalizedEmail = String(email || "").trim().toLowerCase();
 
     // 1. Basic validation
-    if (!name || !email || !password) {
+    if (!normalizedName || !normalizedEmail || !password) {
       return next(new ApiError(400, "All fields are required"));
     }
 
     // 2. Check if doctor already exists
-    const existingDoctor = await Doctor.findOne({ email });
+    const existingDoctor = await Doctor.findOne({ email: normalizedEmail });
     if (existingDoctor) {
       return next(new ApiError(400, "Doctor already exists"));
     }
@@ -24,8 +26,8 @@ const signup = async (req, res, next) => {
 
     // 4. Create new doctor
     const doctor = await Doctor.create({
-      name,
-      email,
+      name: normalizedName,
+      email: normalizedEmail,
       password: hashedPassword,
     });
 
@@ -53,14 +55,15 @@ const login = async (req, res, next) => {
     }
 
     const { email, password } = req.body;
+    const normalizedEmail = String(email || "").trim().toLowerCase();
 
     // 1. Validate input
-    if (!email || !password) {
+    if (!normalizedEmail || !password) {
       return next(new ApiError(400, "Email and password are required"));
     }
 
     // 2. Find doctor by email
-    const doctor = await Doctor.findOne({ email });
+    const doctor = await Doctor.findOne({ email: normalizedEmail });
     if (!doctor) {
       return next(new ApiError(400, "Invalid email or password"));
     }

@@ -20,6 +20,10 @@ const validateEnv = () => {
   ) {
     throw new Error("Set CORS_ORIGIN (or FRONTEND_ORIGIN) in production");
   }
+
+  if (process.env.JWT_SECRET === "change_this_to_a_secure_random_secret") {
+    throw new Error("JWT_SECRET is using a placeholder value. Set a strong secret.");
+  }
 };
 
 const startServer = async () => {
