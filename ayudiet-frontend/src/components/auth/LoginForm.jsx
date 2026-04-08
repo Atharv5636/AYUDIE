@@ -5,13 +5,10 @@ import { Eye, EyeOff } from "lucide-react";
 import { fetchJson } from "../../services/api";
 import AuthTextField from "./AuthTextField";
 import { isValidEmail } from "../../utils/authValidation";
-import ClerkLoginAction from "./ClerkLoginAction";
 
 const GOOGLE_AUTH_ENABLED = import.meta.env.VITE_ENABLE_GOOGLE_AUTH === "true";
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 const GOOGLE_ONLY_LOGIN = true;
-const CLERK_AUTH_ENABLED = import.meta.env.VITE_ENABLE_CLERK_AUTH === "true";
-const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || "";
 
 function LoginForm() {
   const [email, setEmail] = useState("");
@@ -169,35 +166,6 @@ function LoginForm() {
             </p>
           )}
         </div>
-
-        {message && (
-          <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-            {message}
-          </p>
-        )}
-
-        <p className="pt-1 text-center text-sm text-slate-500">
-          Don&apos;t have an account?{" "}
-          <Link to="/signup" className="font-semibold text-slate-900 hover:text-emerald-700">
-            Sign up for free
-          </Link>
-        </p>
-      </div>
-    );
-  }
-
-  if (CLERK_AUTH_ENABLED && CLERK_PUBLISHABLE_KEY) {
-    return (
-      <div className="space-y-5">
-        <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700">
-          Sign in securely with Clerk to continue to your dashboard.
-        </div>
-
-        <ClerkLoginAction
-          disabled={isSubmitting}
-          onSuccess={() => navigate("/dashboard")}
-          onError={(errorMessage) => setMessage(errorMessage)}
-        />
 
         {message && (
           <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
