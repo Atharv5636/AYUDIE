@@ -18,6 +18,7 @@ function SignupForm() {
   const [otp, setOtp] = useState("");
   const [pendingVerificationEmail, setPendingVerificationEmail] = useState("");
   const [message, setMessage] = useState("");
+  const [statusMessage, setStatusMessage] = useState("");
   const [isSuccess, setIsSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -46,10 +47,14 @@ function SignupForm() {
         client_id: GOOGLE_CLIENT_ID,
         auto_select: false,
         callback: async (response) => {
-          if (!response?.credential) return;
+          if (!response?.credential) {
+            setMessage("Google did not return a credential. Please try again.");
+            return;
+          }
 
           setMessage("");
           setIsSuccess(false);
+          setStatusMessage("Signing up with Google...");
           setIsSubmitting(true);
 
           try {
@@ -63,6 +68,7 @@ function SignupForm() {
           } catch (error) {
             setMessage(error.message || "Google signup failed");
           } finally {
+            setStatusMessage("");
             setIsSubmitting(false);
           }
         },
@@ -78,6 +84,7 @@ function SignupForm() {
         width: 360,
       });
       setGoogleReady(true);
+      setStatusMessage("");
     };
 
     const existingScript = document.getElementById(scriptId);
@@ -101,6 +108,7 @@ function SignupForm() {
     script.onerror = () => {
       if (!cancelled) {
         setGoogleReady(false);
+        setStatusMessage("");
         setMessage("Unable to load Google signup. Try again later.");
       }
     };
@@ -129,10 +137,14 @@ function SignupForm() {
           </div>
           {!googleReady && (
             <p className="text-center text-xs text-slate-500">
-              Loading Google signup...
+              {statusMessage || "Loading Google signup..."}
             </p>
           )}
         </div>
+
+        {googleReady && statusMessage && (
+          <p className="text-center text-xs text-slate-500">{statusMessage}</p>
+        )}
 
         {message && (
           <p
@@ -289,10 +301,14 @@ function SignupForm() {
           </div>
           {!googleReady && (
             <p className="text-center text-xs text-slate-500">
-              Loading Google signup...
+              {statusMessage || "Loading Google signup..."}
             </p>
           )}
         </div>
+      )}
+
+      {googleReady && statusMessage && (
+        <p className="text-center text-xs text-slate-500">{statusMessage}</p>
       )}
 
       {pendingVerificationEmail && (

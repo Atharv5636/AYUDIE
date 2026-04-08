@@ -15,6 +15,7 @@ function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
+  const [statusMessage, setStatusMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [googleReady, setGoogleReady] = useState(false);
@@ -45,9 +46,13 @@ function LoginForm() {
         client_id: GOOGLE_CLIENT_ID,
         auto_select: false,
         callback: async (response) => {
-          if (!response?.credential) return;
+          if (!response?.credential) {
+            setMessage("Google did not return a credential. Please try again.");
+            return;
+          }
 
           setMessage("");
+          setStatusMessage("Signing in with Google...");
           setIsSubmitting(true);
           try {
             const data = await fetchJson("/auth/google", {
@@ -60,6 +65,7 @@ function LoginForm() {
           } catch (error) {
             setMessage(error.message || "Google login failed");
           } finally {
+            setStatusMessage("");
             setIsSubmitting(false);
           }
         },
@@ -75,6 +81,7 @@ function LoginForm() {
         width: 360,
       });
       setGoogleReady(true);
+      setStatusMessage("");
     };
 
     const existingScript = document.getElementById(scriptId);
@@ -98,6 +105,7 @@ function LoginForm() {
     script.onerror = () => {
       if (!cancelled) {
         setGoogleReady(false);
+        setStatusMessage("");
         setMessage("Unable to load Google login. Try again later.");
       }
     };
@@ -120,6 +128,7 @@ function LoginForm() {
     }
 
     setIsSubmitting(true);
+    setStatusMessage("Logging in...");
 
     try {
       const data = await fetchJson("/auth/login", {
@@ -139,6 +148,7 @@ function LoginForm() {
     } catch (error) {
       setMessage(error.message || "Server error");
     } finally {
+      setStatusMessage("");
       setIsSubmitting(false);
     }
   };
@@ -161,10 +171,14 @@ function LoginForm() {
           </div>
           {!googleReady && (
             <p className="text-center text-xs text-slate-500">
-              Loading Google sign-in...
+              {statusMessage || "Loading Google sign-in..."}
             </p>
           )}
         </div>
+
+        {googleReady && statusMessage && (
+          <p className="text-center text-xs text-slate-500">{statusMessage}</p>
+        )}
 
         {message && (
           <p className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
@@ -241,10 +255,14 @@ function LoginForm() {
           </div>
           {!googleReady && (
             <p className="text-center text-xs text-slate-500">
-              Loading Google sign-in...
+              {statusMessage || "Loading Google sign-in..."}
             </p>
           )}
         </div>
+      )}
+
+      {googleReady && statusMessage && (
+        <p className="text-center text-xs text-slate-500">{statusMessage}</p>
       )}
 
       {message && (

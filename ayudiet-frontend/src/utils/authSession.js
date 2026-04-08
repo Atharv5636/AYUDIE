@@ -1,5 +1,3 @@
-import { fetchJson } from "../services/api";
-
 export function persistAuthSession(data) {
   const token = String(data?.token || "").trim();
   const doctorName = String(data?.doctor?.name || "").trim();
@@ -25,13 +23,6 @@ export async function completeAuthLogin(data) {
   }
 
   persistAuthSession(data);
-
-  await fetchJson("/auth/me", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
   window.location.assign("/dashboard");
 }
 
