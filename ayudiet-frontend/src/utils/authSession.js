@@ -1,7 +1,22 @@
+const getAuthTokenFromPayload = (payload) =>
+  String(
+    payload?.token ||
+      payload?.accessToken ||
+      payload?.jwt ||
+      payload?.data?.token ||
+      payload?.data?.accessToken ||
+      payload?.data?.jwt ||
+      ""
+  ).trim();
+
+const getDoctorFromPayload = (payload) =>
+  payload?.doctor || payload?.data?.doctor || null;
+
 export function persistAuthSession(data) {
-  const token = String(data?.token || "").trim();
-  const doctorName = String(data?.doctor?.name || "").trim();
-  const doctorEmail = String(data?.doctor?.email || "").trim().toLowerCase();
+  const token = getAuthTokenFromPayload(data);
+  const doctor = getDoctorFromPayload(data);
+  const doctorName = String(doctor?.name || "").trim();
+  const doctorEmail = String(doctor?.email || "").trim().toLowerCase();
 
   if (token) {
     localStorage.setItem("token", token);
@@ -17,9 +32,17 @@ export function persistAuthSession(data) {
 }
 
 export async function completeAuthLogin(data) {
-  const token = String(data?.token || "").trim();
+  const token = getAuthTokenFromPayload(data);
   if (!token) {
-    throw new Error("Login succeeded but no app token was returned");
+    const topLevelKeys = Object.keys(data || {});
+    const nestedKeys =
+      data?.data && typeof data.data === "object" ? Object.keys(data.data) : [];
+    const availableKeys = [...topLevelKeys, ...nestedKeys.map((key) => `data.${key}`)];
+    throw new Error(
+      `Login succeeded but no app token was returned. Response keys: ${
+        availableKeys.join(", ") || "none"
+      }`
+    );
   }
 
   persistAuthSession(data);

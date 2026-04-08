@@ -46,10 +46,22 @@ const buildAuthSuccessResponse = (message, token, doctor) => ({
   success: true,
   message,
   token,
+  accessToken: token,
+  jwt: token,
   doctor: {
     id: doctor._id,
     name: doctor.name,
     email: doctor.email,
+  },
+  data: {
+    token,
+    accessToken: token,
+    jwt: token,
+    doctor: {
+      id: doctor._id,
+      name: doctor.name,
+      email: doctor.email,
+    },
   },
 });
 
