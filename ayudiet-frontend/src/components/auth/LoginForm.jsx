@@ -9,7 +9,7 @@ import { completeAuthLogin } from "../../utils/authSession";
 
 const GOOGLE_AUTH_ENABLED = import.meta.env.VITE_ENABLE_GOOGLE_AUTH === "true";
 const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
-const GOOGLE_ONLY_LOGIN = true;
+const GOOGLE_ONLY_LOGIN = false;
 
 function LoginForm() {
   const [email, setEmail] = useState("");
